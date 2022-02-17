@@ -1,0 +1,20 @@
+{% extends './_base.html' %}
+{% load perm_checks %}
+{% block content %}
+
+  {% include './project_detail_include.html' %}
+
+  <div class="menu-bottom">
+    {% user_is_editor object user as editor %}
+    {% if editor %}
+      <div class="menu-item">
+        <a href="{% url 'prosdib:projectprojectnote-create' object.pk %}">Add Note</a>
+      </div>
+    {% endif %}
+    {% if perms.prosdib.change_project %}
+      <div class="menu-item">
+        <a href="{% url 'prosdib:project-update' object.pk %}">Edit</a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

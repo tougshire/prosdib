@@ -1,0 +1,318 @@
+{% extends './_base.html' %}
+{% load static %}
+{% block content %}
+  <button type="button" id='btn_showvista' class="show">Show Sort/Filter form</button>
+  <div id='div_vista' class="vista hidden" >
+    <form id="frm_vista" method="POST">
+      {% csrf_token %}
+      <div class="field-wrapper">
+        <div class="rowlabel">
+          Sort By
+        </div>
+        <div class="controlset">
+          <select name="order_by">
+            {% for field in order_by_fields_available %}
+              <option value="{{ field.name }}"{% if order_by.0 == field.name %} selected="SELECTED" {% endif %}>{{ field.label }}</option>
+            {% endfor %}
+          </select>
+          <select name="order_by">
+            {% for field in order_by_fields_available %}
+              <option value="{{ field.name }}"{% if order_by.1 == field.name %} selected="SELECTED" {% endif %}>{{ field.label }}</option>
+            {% endfor %}
+          </select>
+          <select name="order_by">
+            {% for field in order_by_fields_available %}
+              <option value="{{ field.name }}"{% if order_by.2 == field.name %} selected="SELECTED" {% endif %}>{{ field.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="field-wrapper">
+        <div class="rowlabel">
+          Quick Search
+        </div>
+        <div class="controlset">
+          <input id="ctl_combined_text_search" name="combined_text_search" value="{{ combined_text_search }}">
+        </div>
+      </div>
+      <div class="field-wrapper">
+        <div class="rowlabel">
+          Is Resolved
+        </div>
+        <div class="controlset value">
+          <input type="hidden" name="filterop__is_resolved" value="exact">
+          <div class="control">
+            <select name="filterfield__is_resolved">
+              <option value="">--</option>
+              <option value="True"{% if filterfield__is_resolved %}{% if "True" in filterfield__is_resolved  %} selected="SELECTED" {% endif %}{% endif %}>Yes</option>
+              <option value="False"{% if filterfield__is_resolved %}{% if "False" in filterfield__is_resolved %} selected="SELECTED" {% endif %}{% endif %}>No</option>
+            </select>
+          </div>
+        </div>
+        <div class="controlset null">&nbsp;x</div>
+      </div>
+      <div class="field-wrapper">
+        <div class="rowlabel">
+          Item is
+        </div>
+        <div class="controlset value">
+          <input type="hidden" name="filterop__item" value="in">
+          <div class="control">
+            <select multiple name="filterfield__item">
+              {% for item in items %}
+                <option value="{{ item.pk }}"{% if filterfield__item %}{% if item.pk|lower in filterfield__item %} selected="SELECTED" {% endif %}{% endif %}>{{ item }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="controlset null">
+          <div class="label">
+            Has no item
+          </div>
+          <div class="control">
+            <input type="checkbox" name="filterop__item" value="isnull" {% if 'isnull' in filterop__item %}checked="CHECKED" {% endif %}>
+          </div>
+        </div>
+      </div>
+      <div class="field-wrapper">
+        <div class="rowlabel">
+          Submitted by
+        </div>
+        <div class="controlset value">
+          <input type="hidden" name="filterop__submitted_by" value="in">
+          <div class="control">
+            <select multiple id="ctrl__filtefield__submitted_by" name="filterfield__submitted_by" >
+              {% for user in users %}
+                <option value="{{ user.pk }}"{% if filterfield__submitted_by %}{% if user.pk|lower in filterfield__submitted_by %} selected="SELECTED" {% endif %}{% endif %}>{{ user }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="controlset null">
+          <div class="label">
+            Has no Submitter
+          </div>
+          <div class="control">
+            <input type="checkbox" name="filterop__submitted_by" value="isnull" {% if 'isnull' in filterop__submitted_by %}checked="CHECKED" {% endif %}>
+          </div>
+        </div>
+      </div>
+      <div class="field-wrapper">
+        <div class="rowlabel">
+            Paginate By
+        </div>
+        <div class="controlset">
+          <input name="paginate_by" value="{{ paginate_by }}">
+        </div>
+      </div>
+      <div class="field-wrapper">
+        <div class="rowlabel">
+            Show Fields
+        </div>
+        <div class="controlset">
+          <select multiple="multiple" name="show_columns">
+            {% for field in showable_fields %}
+              <option value="{{ field.name }}"{% if field.name in show_columns %} selected="SELECTED" {% endif %}>{{ field.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+
+      <div class="field-wrapper">
+        <div class="rowlabel">
+          Save Search As
+        </div>
+        <div class="control">
+          <input name="vista__name" value="">
+        </div>
+      </div>
+
+      <div class="field-wrapper">
+        <div class="rowlabel">
+          &nbsp;
+        </div>
+        <div class="controlset">
+          <button type="submit" name="vista_query_submitted" value='True'>Submit</button>
+        </div>
+      </div>
+      <div class="help_text">
+        &nbsp;
+      </div>
+    </form>
+
+    <form method="POST">
+      {% csrf_token %}
+      <h3>Default View</h3>
+      <div class="field-wrapper">
+        <div class="rowlabel">
+          Get Default Search
+        </div>
+        <div class="controlset">
+          <button type="submit" name="vista_query_submitted" value='True'>Default</button>
+        </div>
+      </div>
+    </form>
+
+    <form method="POST">
+      {% csrf_token %}
+      <h3>Saved View</h3>
+      <div class="field-wrapper">
+        <div class="rowlabel">
+            Get Saved View
+        </div>
+        <div class="controlset">
+          <select name="vista__name">
+            <option value=''>-----</option>
+            {% for vista in vistas%}
+              <option value="{{ vista.name }}">{{ vista.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="field-wrapper">
+        <div class="rowlabel">
+          Action
+        </div>
+        <div class="field">
+          <button type="submit" name="get_vista" value="get">Get</button>
+          <button type="submit" name="delete_vista" value="delete">Delete</button>
+        </div>
+      </div>
+    </form>
+
+  </div>
+
+  <div class="list">
+    <div><a href="{% url 'prosdib:project-create' %}">create</a></div>
+      <div class="row rowhead">
+        {% include './_list_head.html' with field='' %}
+        {% if 'item' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.item %}
+        {% endif %}
+        {% if 'location' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.location %}
+        {% endif %}
+        {% if 'short_description' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.short_description %}
+        {% endif %}
+        {% if 'urgency' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.urgency %}
+        {% endif %}
+        {% if 'submitted_by' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.submitted_by %}
+        {% endif %}
+        {% if 'when' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.when %}
+        {% endif %}
+        {% if 'is_resolved' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.is_resolved %}
+        {% endif %}
+      </div>
+
+      {% for item in object_list %}
+        <div class="row">
+          <div class="listfield"><a href="{% url 'prosdib:project-detail' item.pk %}">view</a></div>
+          {% if 'item' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.item %}
+          {% endif %}
+          {% if 'location' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.location %}
+          {% endif %}
+          {% if 'short_description' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.short_description %}
+          {% endif %}
+          {% if 'urgency' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.urgency %}
+          {% endif %}
+          {% if 'submitted_by' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.submitted_by %}
+          {% endif %}
+          {% with when_formatted=item.when|date:'Y-m-d'  %}
+            {% if 'when' in show_columns or not show_columns %}
+              {% include './_list_field.html' with field=when_formatted %}
+            {% endif %}
+          {% endwith %}
+          {% if 'is_resolved' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.is_resolved|yesno %}
+          {% endif %}
+        </div>
+      {% endfor %}
+
+    </div>
+  </div>
+  <div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a id="a_first" href="?page=1">&laquo; first</a>
+            <a id="a_previous" href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a id="a_next" href="?page={{ page_obj.next_page_number }}">next</a>
+            <a id="a_last" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+  </div>
+
+
+{% endblock %}
+{% block bottomscript %}
+  {{ block.super }}
+  <script>
+
+  for( paginator of ['a_first', 'a_previous', 'a_next', 'a_last']) {
+    if(!(document.getElementById(paginator)==null) ) {
+      document.getElementById(paginator).addEventListener('click', function(e) {
+        e.preventDefault()
+        document.getElementById('frm_vista').action = e.target.href
+        document.getElementById('frm_vista').submit()
+      });
+    }
+  }
+  </script>
+  <script src="{% static 'touglates/touglates.js' %}"></script>
+  <script>
+
+    function toggleSortFilterForm() {
+      btnShowvista = document.getElementById('btn_showvista')
+      var vistaDiv = document.getElementById('div_vista')
+      vistaDiv.classList.toggle('hidden')
+      if( vistaDiv.classList.contains('hidden')) {
+        btnShowvista.textContent='Show Sort/Filter Form'
+      } else {
+        document.getElementById("ctl_combined_text_search").focus()
+        btnShowvista.textContent='Hide Sort/Filter Form'
+      }
+    }
+  </script>
+  <script>
+    document.getElementById('btn_showvista').addEventListener('click', function(e){
+      e.preventDefault
+      toggleSortFilterForm()
+    });
+
+  </script>
+  <script>
+    document.addEventListener('keydown', function(e) {
+      if(e.ctrlKey) {
+        if(e.shiftKey) {
+          if(e.which==70) {
+            e.preventDefault();
+            toggleSortFilterForm()
+          }
+        }
+      }
+    });
+  </script>
+  <script>
+    addFilterInput("ctrl__filter__item__in")
+  </script>
+  <script>
+    addFilterInput("ctrl__filter__item__in")
+  </script>
+{% endblock %}

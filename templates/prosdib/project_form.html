@@ -1,0 +1,201 @@
+{% extends './_form.html' %}
+{% load static %}
+{% load perm_checks %}
+{% block content %}
+  <h2>{{ object }}</h2>
+  {{ form.errors }}
+  <form method="POST">
+    <div class="form">
+      {% csrf_token %}
+      {% for field in form.hidden_fields %}
+        {{ field }}
+      {% endfor %}
+
+      <div id="div_title">
+        {% include './_form_field.html' with field=form.title %}
+      </div>
+      <div id="div_description">
+        {% include './_form_field.html' with field=form.description %}
+      </div>
+      <div id="div_begin">
+        {% include './_form_field.html' with field=form.begin %}
+      </div>
+      <div id="div_priority">
+        {% include './_form_field.html' with field=form.priority %}
+      </div>
+      {% if perms.prosdib.change_project %}
+        <div id="div_technician">
+          {% include './_form_field.html' with field=form.technician %}
+        </div>
+        <div id="div_is_complete">
+          {% include './_form_field.html' with field=form.is_complete %}
+        </div>
+        <div id="div_completion_notes">
+          {% include './_form_field.html' with field=form.completion_notes %}
+        </div>
+        <div id="div_recipient_emails">
+          {% include './_form_field.html' with field=form.recipient_emails %}
+        </div>
+        <div id="div_donot_send">
+          {% include './_form_field.html' with field='<input type="checkbox" name="donot_send">' label_tag="Do Not Send Emails" help_text="Do not send emails for this update (does not affect future updates)" %}
+        </div>
+      {% endif %}
+
+      {% include './_form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
+
+      <h3>Notes</h3>
+
+      {{ projectnotes.management_form }}
+      {% for projectnoteform in projectnotes.forms %}
+        {% if projectnoteform.id.value > 0 %}
+          <div id="div_projectnoteform_{{ projectnoteform.id.value }}" class="projectnoteformsetform"  >
+            {% for hiddenfield in projectnoteform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include './_form_field.html' with field=projectnoteform.when %}
+            {% include './_form_field.html' with field=projectnoteform.text %}
+            {% include './_form_field.html' with field=projectnoteform.DELETE %}
+          </div>
+        {% else %}
+          <div class="projectnoteformsetform projectnotenewform" >
+            {% for hiddenfield in projectnoteform.hidden_fields %}
+              {{ hiddenfield }}
+            {% endfor %}
+            {% include './_form_field.html' with field=projectnoteform.when %}
+            {% include './_form_field.html' with field=projectnoteform.text %}
+            {% include './_form_field.html' with field=projectnoteform.DELETE %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      <table>
+        <tr>
+          <td><button type="button" id="button_addprojectnote">Add</button></td><td span="*"></td>
+        </tr>
+        {% for projectnote in object.projectnote_set.all %}
+          <tr id="tr_projectnote_{{ projectnote.id }}">
+            <td>{{ projectnote.when }}</td><td>{{ projectnote.text }}</td><td>{{ projectnote.is_major }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      {% include './_form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
+
+    </div>
+
+  </form>
+
+{% endblock %}
+{% block bottomscript %}
+  {{ block.super }}
+  <script>
+    function setLocation() {
+      var itemField = document.getElementById('{{ form.item.id_for_label }}')
+      var locationField = document.getElementById('{{ form.location.id_for_label }}')
+      var itemSelectedOptions = itemField.selectedOptions
+      if(itemSelectedOptions.length==1) {
+        locationField.value=itemSelectedOptions[0].getAttribute('data-home')
+      }
+    }
+    document.getElementById('{{ form.item.id_for_label }}').addEventListener('change', function() {
+      console.log('change event triggered')
+      setLocation();
+    })
+
+  </script>
+  <script>
+    function displayEditItemLink() {
+      if("{{ perms.prosdib.change_project }}"=="True") {
+        var href0="{% url 'libtekin:item-update' 0  %}"
+        var itemSelect = document.getElementById("{{ form.item.id_for_label }}")
+        var aItem = document.getElementById('a_itemEdit')
+        if(typeof(aItem) != 'undefined' && aItem != null){
+          document.getElementById('a_itemEdit').remove()
+        }
+        if( itemSelect.value > 0 ) {
+          var href = href0.replace("0", itemSelect.value)
+          var aItem = document.createElement('a')
+          aItem.id="a_itemEdit"
+          aItem.innerText="Edit Item"
+          aItem.target="_blank"
+          itemSelect.parentNode.insertBefore(aItem, itemSelect.nextSibling )
+          aItem.href=href
+          aItem.addEventListener('click', function(e) {
+            e.preventDefault
+            window.open(href)
+          })
+        }
+      }
+    }
+    document.getElementById("{{ form.item.id_for_label }}").addEventListener("change", function(){
+      displayEditItemLink()
+    });
+    displayEditItemLink()
+  </script>
+  <script>
+    addFilterInput("{{ form.item.id_for_label }}")
+  </script>
+  <script>
+    function addAddNotePopupEvent() {
+      aAddNote = document.getElementById('a_addnote')
+      if(typeof(aAddNote) != 'undefined' && aAddNote != null){
+        document.getElementById('a_addnote').addEventListener('click', function(e) {
+          e.preventDefault()
+          window.open(e.target.href)
+        });
+      }
+    }
+    addAddNotePopupEvent()
+    function refreshDiv(fields, model) {
+      var emptydiv = document.getElementById('div_' + model + '-empty')
+      var newdiv = emptydiv.cloneNode(true)
+      var allProjectnoteDivs = document.getElementsByClassName('relatedprojectnote')
+      newdiv.id = 'div_' + model + '-' + allProjectnoteDivs.length
+      keys = Object.keys(fields)
+      console.log('keys:')
+      console.log(keys)
+      for(key of keys){
+        console.log("span[data-field='" + key + "']")
+        console.log(fields[key])
+        newdiv.querySelector("span[data-field='" + key + "']").innerText=fields[key]
+      }
+      newdiv.style.display="block"
+      emptydiv.parentNode.insertBefore(newdiv, emptydiv)
+    }
+  </script>
+  <script>
+    function enableFormsetForm(formid, displayid) {
+      let form = document.getElementById(formid)
+      document.getElementById(formid).style.display="block"
+      document.getElementById(displayid).style.display="none"
+    }
+    let projectnoteEditButtons = document.getElementsByClassName('projectnote_edit_button')
+    for( projectnoteEditButton of projectnoteEditButtons){
+      projectnoteEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
+    function enableAddFormsetForm(formclass) {
+      let newforms = document.getElementsByClassName(formclass)
+      if( newforms.length > 0) {
+        let newform = newforms[0]
+        newform.style.display="block"
+        newform.classList.remove(formclass)
+      } else {
+        alert('please save before adding more')
+      }
+    }
+
+    document.getElementById('button_addprojectnote').addEventListener('click', function(e){
+      e.preventDefault()
+      enableAddFormsetForm('projectnotenewform')
+    })
+    let projectnoteforms = document.getElementsByClassName("projectnoteformsetform")
+    for( projectnoteform of projectnoteforms ){
+      projectnoteform.style.display="none"
+    }
+
+  </script>
+
+{% endblock %}
+

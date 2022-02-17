@@ -1,0 +1,138 @@
+/* overall layout */
+
+/* layout of elements */
+
+.detail .control {
+    width:80%;
+}
+
+.detail .controlgroup {
+    width:100%;
+    display:flex;
+}
+
+.form .field {
+    width:80%;
+}
+
+.detail .field-wrapper {
+    margin-top:.5em;
+}
+
+.detail .label {
+    width:15%;
+}
+
+.detail .help_text {
+    margin-left:15%;
+}
+
+.hidden {
+    display:none;
+}
+
+.form .formset {
+    margin-left:2em;
+}
+
+.list {
+    width:100%;
+    display:table;
+}
+.list .row {
+    display:table-row
+}
+.list .rowhead {
+    background-color:#eeeeff;
+}
+
+.list .field {
+    display:table-cell;
+    border: 1px solid lightblue;
+    padding-left: .2em;
+    padding-right: .2em;
+}
+
+.list .field::after {
+    content: "\00a0"
+}
+
+.list .rowhead .field {
+    border:1px solid blue;
+}
+
+.menu-bottom {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    padding: 1px 1px;
+}
+
+.menu-top {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    padding: 1px 1px;
+}
+
+.relatedset {
+    margin-left:2em;
+}
+
+/* .vista {
+} */
+
+.vista .field-wrapper {
+    display:flex;
+    justify-content:flex-start space-between;
+    margin:1em 0 1em auto;
+}
+
+.vista .field-wrapper div {
+    flex: 0 0 auto;
+}
+
+.vista .null {
+    grid-column: 4 / span 1;
+}
+
+.vista .rowlabel {
+    width:10%;
+}
+
+.vista .value {
+    width:30%;
+    display:flex;
+}
+
+.vista .value .label {
+    width:20%;
+}
+
+input.len100, textarea.len100 {
+    width:100%;
+}
+
+input.len75, textarea.len75 {
+    width:75%;
+}
+input.len50, textarea.len50 {
+    width:50%;
+}
+
+
+/* Font, etc.. */
+.menu a {
+    text-decoration: none;
+}
+
+/* Colors */
+.menu {
+    color: white;
+    background-color:cornflowerblue;
+}
+
+.menu a:link, .menu a:visited {
+    color:white;
+}
+
