@@ -79,11 +79,11 @@
           Submitted by
         </div>
         <div class="controlset value">
-          <input type="hidden" name="filterop__submitted_by" value="in">
+          <input type="hidden" name="filterop__technician" value="in">
           <div class="control">
-            <select multiple id="ctrl__filtefield__submitted_by" name="filterfield__submitted_by" >
+            <select multiple id="ctrl__filtefield__technician" name="filterfield__technician" >
               {% for user in users %}
-                <option value="{{ user.pk }}"{% if filterfield__submitted_by %}{% if user.pk|lower in filterfield__submitted_by %} selected="SELECTED" {% endif %}{% endif %}>{{ user }}</option>
+                <option value="{{ user.pk }}"{% if filterfield__technician %}{% if user.pk|lower in filterfield__technician %} selected="SELECTED" {% endif %}{% endif %}>{{ user }}</option>
               {% endfor %}
             </select>
           </div>
@@ -93,7 +93,7 @@
             Has no Submitter
           </div>
           <div class="control">
-            <input type="checkbox" name="filterop__submitted_by" value="isnull" {% if 'isnull' in filterop__submitted_by %}checked="CHECKED" {% endif %}>
+            <input type="checkbox" name="filterop__technician" value="isnull" {% if 'isnull' in filterop__technician %}checked="CHECKED" {% endif %}>
           </div>
         </div>
       </div>
@@ -187,26 +187,29 @@
     <div><a href="{% url 'prosdib:project-create' %}">create</a></div>
       <div class="row rowhead">
         {% include './_list_head.html' with field='' %}
-        {% if 'item' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.item %}
+        {% if 'title' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.title %}
         {% endif %}
-        {% if 'location' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.location %}
+        {% if 'description' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.description %}
         {% endif %}
-        {% if 'short_description' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.short_description %}
+        {% if 'priority' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.priority %}
         {% endif %}
-        {% if 'urgency' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.urgency %}
+        {% if 'begin' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.begin %}
         {% endif %}
-        {% if 'submitted_by' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.submitted_by %}
+        {% if 'technician' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.technician %}
         {% endif %}
         {% if 'when' in show_columns or not show_columns %}
           {% include './_list_head.html' with field=project_labels.when %}
         {% endif %}
-        {% if 'is_resolved' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.is_resolved %}
+        {% if 'status' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field=project_labels.status %}
+        {% endif %}
+        {% if 'notes' in show_columns or not show_columns %}
+          {% include './_list_head.html' with field='Notes' %}
         {% endif %}
       </div>
 
@@ -214,28 +217,32 @@
         <div class="row">
           <div class="listfield"><a href="{% url 'prosdib:project-detail' item.pk %}">view</a></div>
           {% if 'item' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.item %}
+            {% include './_list_field.html' with field=item.title %}
           {% endif %}
-          {% if 'location' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.location %}
+          {% if 'description' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.description %}
           {% endif %}
-          {% if 'short_description' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.short_description %}
+          {% if 'priority' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.get_priority_display %}
           {% endif %}
-          {% if 'urgency' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.urgency %}
+          {% if 'begin' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.begin %}
           {% endif %}
-          {% if 'submitted_by' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.submitted_by %}
+          {% if 'technician' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.technician %}
           {% endif %}
           {% with when_formatted=item.when|date:'Y-m-d'  %}
             {% if 'when' in show_columns or not show_columns %}
-              {% include './_list_field.html' with field=when_formatted %}
+              {% include './_list_field.html' with field=when %}
             {% endif %}
           {% endwith %}
-          {% if 'is_resolved' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.is_resolved|yesno %}
+          {% if 'status' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.get_status_display %}
           {% endif %}
+          {% if 'notes' in show_columns or not show_columns %}
+            {% include './_list_field.html' with field=item.get_major_notes %}
+          {% endif %}
+
         </div>
       {% endfor %}
 

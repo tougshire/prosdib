@@ -115,6 +115,17 @@ class Project(models.Model):
     def user_is_editor(self, user):
         return user == self.created_by or user.has_perm('prosdib.change_project')
 
+    def get_major_notes(self):
+        major_notes=[]
+        if self.completion_notes:
+            major_notes.append('final:{}'.format(self.completion_notes))
+
+        for note in self.projectnote_set.all():
+            if(note.is_major):
+                major_notes.append('{}:{}'.format(note.when, note.text))
+
+        return "\n".join(major_notes)
+
     class Meta:
         ordering=['status', 'priority', 'begin']
 
