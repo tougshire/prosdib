@@ -2,14 +2,15 @@ from django.contrib import admin
 from .models import Project, Technician, ProjectNote
 
 class ProjectAdmin(admin.ModelAdmin):
-    list_display=('title', 'technician', 'is_complete')
+    list_display=('title', 'technician', 'status')
     fields=(
         'title',
         'description',
         'priority',
         'technician',
+        'created_by',
         'begin',
-        'is_complete',
+        'status',
         'completion_notes',
         'recipient_emails'
     )

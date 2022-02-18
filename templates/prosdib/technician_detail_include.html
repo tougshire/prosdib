@@ -1,0 +1,8 @@
+<h2>{{ object }}</h2>
+<div class="detail">
+  {% include './_detail_field.html' with label=mmodel_labels.user field=object.user %}
+  {% include './_detail_field.html' with label=mmodel_labels.name field=object.name %}
+  {% include './_detail_field.html' with label=mmodel_labels.is_active field=object.is_active %}
+
+</div>
+

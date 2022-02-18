@@ -1,0 +1,12 @@
+{% extends './_base.html' %}
+{% block content %}
+
+  {% include './technician_detail_include.html' %}
+
+  <div>
+  <a href="{% url 'prosdib:technician-update' object.pk %}">Edit</a>
+  </div>
+  <div>
+  <a href="{% url 'prosdib:technician-delete' object.pk %}">Delete</a>
+  </div>
+{% endblock %}

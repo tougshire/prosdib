@@ -1,0 +1,9 @@
+{% extends './_base.html' %}
+{% block content %}
+{{ object }}
+<form method="POST">
+{% csrf_token %}
+<div>
+<button type="submit">Confirm Delete</button>
+</div>
+{% endblock %}

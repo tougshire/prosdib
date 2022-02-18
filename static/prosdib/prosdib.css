@@ -74,9 +74,28 @@
     width: 100%;
     padding: 1px 1px;
 }
-
-.relatedset {
+.detail-related {
+    display:table;
+    width:100%;
+}
+.detail-related .relatedheader {
     margin-left:2em;
+    display:table-row;
+}
+
+.detail-related .relatedset {
+    margin-left:2em;
+    display:table-row;
+}
+
+.detail-related .label, .detail-related .field {
+    display:table-cell;
+    padding-right: 2em;
+}
+
+.detail-related .label, .detail-related .field {
+    display:table-cell;
+    padding-right:3em;
 }
 
 /* .vista {

@@ -10,12 +10,19 @@
       {% for field in form.hidden_fields %}
         {{ field }}
       {% endfor %}
-      <div id="div_item">
-        {% include './_form_field.html' with field=form.text %}
-      </div>
-      <div id="div_location">
+      <div id="div_when">
         {% include './_form_field.html' with field=form.when %}
       </div>
+      <div id="div_text">
+        {% include './_form_field.html' with field=form.text %}
+      </div>
+      <div id="div_time_spent">
+        {% include './_form_field.html' with field=form.time_spent %}
+      </div>
+      <div id="div_is_major">
+        {% include './_form_field.html' with field=form.is_major %}
+      </div>
+
       <button type="submit">Submit</button>
     </div>
   </form>

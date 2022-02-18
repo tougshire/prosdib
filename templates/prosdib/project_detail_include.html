@@ -2,46 +2,58 @@
   <h2>{{ object }}</h2>
 
   <div class="detail">
-    {% url 'libtekin:item-detail' object.item.pk as theurl %}
-    {% with item=object.item.common_name|add:' [<a href="'|add:theurl|add:'" target="_blank">view item</a>]'|safe %}
-      {% include './_detail_field.html' with label=project_labels.item field=item %}
-    {% endwith %}
-    {% include './_detail_field.html' with label=project_labels.location field=object.location %}
-    {% include './_detail_field.html' with label=project_labels.short_description field=object.short_description %}
-    {% include './_detail_field.html' with label=project_labels.long_description field=object.long_description %}
-    {% include './_detail_field.html' with label=project_labels.urgency field=object.urgency %}
-    {% include './_detail_field.html' with label=project_labels.submitted_by field=object.submitted_by %}
-    {% include './_detail_field.html' with label=project_labels.is_resolved field=object.is_resolved|yesno %}
-    {% include './_detail_field.html' with label=project_labels.resolution_notes field=object.resolution_notes %}
-
+    {% include './_detail_field.html' with label=project_labels.title field=object.title %}
+    {% include './_detail_field.html' with label=project_labels.description field=object.description %}
+    {% include './_detail_field.html' with label=project_labels.priority field=object.get_priority_display %}
+    {% include './_detail_field.html' with label=project_labels.technician field=object.technician %}
+    {% include './_detail_field.html' with label=project_labels.created_by field=object.created_by %}
+    {% include './_detail_field.html' with label=project_labels.begin field=object.begin %}
+    {% include './_detail_field.html' with label=project_labels.status field=object.get_status_display %}
+    {% include './_detail_field.html' with label=project_labels.completion_notes field=object.completion_notes %}
 
     <h3>Notes</h3>
     {% user_is_editor object user as editor %}
-    <table>
+    <div class="detail-related">
+      <div class="relatedheader">
+        <div class="field">
+          Date/time of note
+        </div>
+        <div class="field">
+          Text
+        </div>
+        <div class="field">
+          Submitted By
+        </div>
+        <div class="field">
+          Time spent
+        </div>
+      </div>
+
     {% for projectnote in object.projectnote_set.all %}
       <div class="relatedset relatedprojectnote" id="div_projectnote-{{ forloop.counter0 }}">
-        <div class="fieldWrapper">
-          <div class="control">
-            <div class="label">
-              Note:
+            <div class="field">
+              {{ projectnote.when }}
             </div>
             <div class="field">
-              {{ projectnote.when }}: {{ projectnote.text }} --{{ projectnote.submitted_by }}
+              {{ projectnote.text }}
             </div>
-          </div>
-        </div>
+            <div class="field">
+              {{ projectnote.submitted_by }}
+            </div>
+            <div class="field">
+              {{ projectnote.time_spent }}
+            </div>
+
       </div>
     {% endfor %}
     <div class="relatedset relatedprojectnote" id="div_projectnote-empty" style="display:none">
-      <div class="fieldWrapper">
-        <div class="control">
-          <div class="label">
-            Note:
-          </div>
-          <div class="field">
-            <span data-field="when"></span> : <span data-field="text"></span>
-          </div>
-        </div>
+      <div class="field">
+      </div>
+      <div class="field">
+      </div>
+      <div class="field">
+      </div>
+      <div class="field">
       </div>
     </div>
   </div>

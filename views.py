@@ -21,7 +21,7 @@ from tougshire_vistas.views import (delete_vista, get_global_vista,
                                     get_latest_vista, make_vista,
                                     retrieve_vista)
 
-from .forms import ProjectForm, ProjectProjectNoteForm, ProjectProjectNoteFormset
+from .forms import ProjectForm, ProjectProjectNoteForm, ProjectProjectNoteFormset, TechnicianForm
 from .models import History, Technician, Project, ProjectNote
 
 
@@ -70,8 +70,7 @@ def send_project_mail(project, request, is_new=False):
     mail_message = "\n".join(
         [
             f"Title: { project.title }",
-            f"Urgency: { project.get_urgency_display() }",
-            f"Item: { project.item }",
+            f"Urgency: { project.get_priority_display() }",
             f"Description: { project.description }",
             f"Project URL: { project_url }",
         ]
@@ -82,8 +81,7 @@ def send_project_mail(project, request, is_new=False):
     mail_html_message = "<br>\n".join(
         [
             f"Title: { project.title }",
-            f"Urgency: { project.get_urgency_display() }",
-            f"Item: { project.item }",
+            f"Urgency: { project.get_priority_display() }",
             f"Description: { project.description }",
             f"Project URL: <a href=\"{ project_url }\">{ project_url }</a>"
         ]
@@ -127,12 +125,12 @@ class ProjectCreate(PermissionRequiredMixin, CreateView):
             }
         ])
 
-
         return context_data
 
     def get_initial(self):
         tech_emails = [tech.user.email for tech in Technician.objects.filter(is_current=True).filter(user__isnull=False)]
         all_recipient_emails = ( tech_emails + [ self.request.user.email ] ) if self.request.user.email not in tech_emails else tech_emails
+
         return {
             'recipient_emails': ",\n".join(all_recipient_emails)
         }
@@ -142,9 +140,15 @@ class ProjectCreate(PermissionRequiredMixin, CreateView):
         response = super().form_valid(form)
 
         self.object = form.save(commit=False)
-        self.object.submitted_by = self.request.user
+        technician, created = Technician.objects.get_or_create(
+            user=self.request.user,
+            defaults={'name': self.request.user.__str__()},
+        )
+        self.object.submitted_by = technician
+
         if not 'recipient_emails' in self.request.POST:
             self.object.recipient_emails = self.get_initial()['recipient_emails']
+
 
         self.object.save()
 
@@ -154,7 +158,7 @@ class ProjectCreate(PermissionRequiredMixin, CreateView):
             for form in projectnotes.forms:
                 projectnote = form.save(commit=False)
                 if projectnote.submitted_by is None:
-                    projectnote.submitted_by = self.request.user
+                    projectnote.submitted_by = technician
             projectnotes.save()
         else:
             return self.form_invalid(form)
@@ -193,9 +197,14 @@ class ProjectUpdate(PermissionRequiredMixin, UpdateView):
 
         self.object = form.save()
 
+        technician, created = Technician.objects.get_or_create(
+            user=self.request.user,
+            defaults={'name': self.request.user.__str__()},
+        )
+
         projectnotes = ProjectProjectNoteFormset(self.request.POST, instance=self.object, initial=[
             {
-                'submitted_by': self.request.user
+                'submitted_by': technician
             }
         ])
 
@@ -203,9 +212,10 @@ class ProjectUpdate(PermissionRequiredMixin, UpdateView):
             for form in projectnotes.forms:
                 projectnote = form.save(commit=False)
                 if projectnote.submitted_by is None:
-                    projectnote.submitted_by = self.request.user
+                    projectnote.submitted_by = technician
             projectnotes.save()
         else:
+            print('tp m2if36', projectnotes.errors)
             return self.form_invalid(form)
 
         if not 'donot_send' in self.request.POST:
@@ -282,7 +292,8 @@ class ProjectList(PermissionRequiredMixin, ListView):
             'priority',
             'begin',
             'technician',
-            'is_complete',
+            'created_by',
+            'status',
             'completion_notes',
         ]
 
@@ -291,7 +302,8 @@ class ProjectList(PermissionRequiredMixin, ListView):
             'priority',
             'begin',
             'technician',
-            'is_complete',
+            'created_by',
+            'status',
         ]:
             self.vista_settings['order_by_fields_available'].append(fieldname)
             self.vista_settings['order_by_fields_available'].append('-' + fieldname)
@@ -302,7 +314,8 @@ class ProjectList(PermissionRequiredMixin, ListView):
             'priority',
             'begin',
             'technician',
-            'is_complete',
+            'created_by',
+            'status',
             'completion_notes',
             'recipient_emails',
         ]:
@@ -310,8 +323,8 @@ class ProjectList(PermissionRequiredMixin, ListView):
 
         self.vista_defaults = {
             'order_by': Project._meta.ordering,
-            'filterop__is_complete':'exact',
-            'filterfield__is_complete': 'False',
+            'filterop__status':'in',
+            'filterfield__status': (1,2,3),
             'paginate_by':self.paginate_by
         }
 
@@ -413,7 +426,11 @@ class ProjectProjectNoteCreate(PermissionRequiredMixin, CreateView):
 
         self.object=form.save(commit=False)
         self.object.project=Project.objects.get(pk=self.kwargs.get('projectpk'))
-        self.object.submitted_by = self.request.user
+        technician, created = Technician.objects.get_or_create(
+            user=self.request.user,
+            defaults={'name': self.request.user.__str__()},
+        )
+        self.object.submitted_by = technician
         self.object.save()
 
         send_project_mail(self.object.project, self.request, is_new=False)
@@ -422,3 +439,57 @@ class ProjectProjectNoteCreate(PermissionRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy('prosdib:project-detail', kwargs={'pk': self.object.project.pk})
+
+
+class TechnicianCreate(PermissionRequiredMixin, CreateView):
+    permission_required = 'prosdib.add_technician'
+    model = Technician
+    form_class = TechnicianForm
+
+    def get_success_url(self):
+        if 'opener' in self.request.POST and self.request.POST['opener'] > '':
+            return reverse_lazy('prosdib:technician-close', kwargs={'pk': self.object.pk})
+        else:
+            return reverse_lazy('prosdib:technician-detail', kwargs={'pk': self.object.pk})
+
+        return response
+
+class TechnicianUpdate(PermissionRequiredMixin, UpdateView):
+    permission_required = 'prosdib.change_technician'
+    model = Technician
+    form_class = TechnicianForm
+
+    def get_success_url(self):
+        return reverse_lazy('prosdib:technician-detail', kwargs={'pk': self.object.pk})
+
+
+class TechnicianDetail(PermissionRequiredMixin, DetailView):
+    permission_required = 'prosdib.view_technician'
+    model = Technician
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+        context_data['technician_labels'] = { field.name: field.verbose_name.title() for field in Technician._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+
+        return context_data
+
+class TechnicianDelete(PermissionRequiredMixin, DeleteView):
+    permission_required = 'prosdib.delete_technician'
+    model = Technician
+    success_url = reverse_lazy('prosdib:technician-list')
+
+class TechnicianList(PermissionRequiredMixin, ListView):
+    permission_required = 'prosdib.view_technician'
+    model = Technician
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['technician_labels'] = { field.name: field.verbose_name.title() for field in Technician._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+        return context_data
+
+class TechnicianClose(PermissionRequiredMixin, DetailView):
+    permission_required = 'prosdib.view_technician'
+    model = Technician
+    template_name = 'prosdib/technician_closer.html'
+

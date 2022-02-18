@@ -42,21 +42,34 @@ class Project(models.Model):
             (4, '4) Fix a Moderately Important Issue or Implement a Moderately Importent Solution'),
             (5, '5) Fix a Minor Issue or implement a minor improvement')
     )
+    STATUS_CHOICES = (
+            (0, 'Not assigned'),
+            (1, 'In progress'),
+            (2, 'Paused'),
+            (3, 'Canceled'),
+            (4, 'Completed'),
+    )
+    STATUS_NOTASSIGNED=0
+    STATUS_INPROGRESS=1
+    STATUS_PAUSED=2
+    STATUS_CANCELED=3
+    STATUS_COMPLETED=4
+
     title = models.CharField(
         'title',
         max_length=75,
-        help_text='A short description of the issue',
+        help_text='A short description of the project',
     )
     description = models.TextField(
         'description',
         blank=True,
-        help_text='The description of the problem if the short description isn\'t adequate'
+        help_text='Details about the project'
     )
     priority = models.IntegerField(
         'priority',
         choices=PRIORITY_CHOICES,
         default=4,
-        help_text='The urgency, on a scale of 1 to 5, where 1 is the most urgent'
+        help_text='The priority, on a scale of 1 to 5, where 1 is the highest priority'
     )
     begin = models.DateTimeField(
         default=datetime.now,
@@ -68,14 +81,22 @@ class Project(models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        help_text='The technician responsible for responding to this project'
+        related_name='project_responsibility',
+        help_text='The technician primarily responsible for executing this project'
     )
-    is_complete = models.BooleanField(
-        'is resolved',
-        blank=True,
-        default=False,
-        help_text = 'If the problem is resolved'
-
+    created_by = models.ForeignKey(
+        Technician,
+        verbose_name='created by',
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='project_created',
+        help_text='The technician who created this project'
+    )
+    status = models.IntegerField(
+        'status',
+        choices=STATUS_CHOICES,
+        default=1,
+        help_text = 'The status of the project'
     )
     completion_notes = models.TextField(
         'resolution notes',
@@ -89,13 +110,13 @@ class Project(models.Model):
     )
 
     def __str__(self):
-        return self.short_description
+        return self.title
 
     def user_is_editor(self, user):
-        return user == self.submitted_by or user.has_perm('prosdib.change_project')
+        return user == self.created_by or user.has_perm('prosdib.change_project')
 
     class Meta:
-        ordering=['is_complete', 'priority', 'begin']
+        ordering=['status', 'priority', 'begin']
 
 
 class ProjectNote(models.Model):
@@ -112,17 +133,28 @@ class ProjectNote(models.Model):
         help_text='The text of the note'
     )
     submitted_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        Technician,
         verbose_name='submitted by',
         null=True,
         on_delete=models.SET_NULL,
-        help_text='The user who submitted this note'
+        help_text='The technician who submitted this note'
     )
     when = models.DateTimeField(
         'when',
         default=datetime.now,
         help_text='The date that the note was submitted'
     )
+    time_spent = models.IntegerField(
+        'time spent',
+        default=0,
+        help_text='The amount of time to be added to the project as per this note'
+    )
+    is_major = models.BooleanField(
+        'is major or current status',
+        default=False,
+        help_text='If this note is diplayed by default in the project detail view.  If not, it will be displayed when "Show All" is selected'
+    )
+
 
     def __str__(self):
         return self.text

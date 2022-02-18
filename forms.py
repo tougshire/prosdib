@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Project, ProjectNote
+from .models import Project, ProjectNote, Technician
 
 class ItemSelect(forms.Select):
     def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
@@ -30,7 +30,7 @@ class ProjectForm(forms.ModelForm):
             'description',
             'priority',
             'technician',
-            'is_complete',
+            'status',
             'recipient_emails',
             'completion_notes',
         ]
@@ -48,10 +48,23 @@ class ProjectProjectNoteForm(forms.ModelForm):
         fields = [
             'when',
             'text',
+            'is_major',
+            'time_spent',
         ]
         widgets={
             'when':forms.DateTimeInput(format='%Y-%m-%dT%H:%M:%S',  attrs={'type':'datetime-local'} ),
             'text':forms.TextInput(attrs={'class':'len100'})
         }
+
+class TechnicianForm(forms.ModelForm):
+    class Meta:
+        model = Technician
+        fields = [
+            'user',
+            'name',
+            'is_current',
+        ]
+
+
 
 ProjectProjectNoteFormset = inlineformset_factory(Project, ProjectNote, form=ProjectProjectNoteForm, extra=10)
