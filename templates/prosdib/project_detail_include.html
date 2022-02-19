@@ -32,7 +32,7 @@
     {% for projectnote in object.projectnote_set.all %}
       <div class="relatedset relatedprojectnote" id="div_projectnote-{{ forloop.counter0 }}">
             <div class="field">
-              {{ projectnote.when }}
+              {{ projectnote.when|date:'Y-m-d' }}
             </div>
             <div class="field">
               {{ projectnote.text }}

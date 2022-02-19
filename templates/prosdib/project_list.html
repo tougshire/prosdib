@@ -223,10 +223,10 @@
             {% include './_list_field.html' with field=item.description %}
           {% endif %}
           {% if 'priority' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.get_priority_display %}
+            {% include './_list_field.html' with field=item.priority %}
           {% endif %}
           {% if 'begin' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.begin %}
+            {% include './_list_field.html' with field=item.begin|date:'Y-m-d' %}
           {% endif %}
           {% if 'technician' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=item.technician %}

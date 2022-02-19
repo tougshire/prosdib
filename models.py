@@ -122,7 +122,7 @@ class Project(models.Model):
 
         for note in self.projectnote_set.all():
             if(note.is_major):
-                major_notes.append('{}:{}'.format(note.when, note.text))
+                major_notes.append('{}: {}'.format(note.when.strftime('%Y-%m-%d'), note.text))
 
         return "\n".join(major_notes)
 
