@@ -78,11 +78,21 @@
         </tr>
         {% for projectnote in object.projectnote_set.all %}
           <tr id="tr_projectnote_{{ projectnote.id }}">
-            <td>{{ projectnote.when }}</td><td>{{ projectnote.text }}</td><td>{{ projectnote.is_major }}</td>
+            <td>
+              <button type="button" id="button_editprojectnote_{{ projectnote.id }}" data-formid="div_projectnoteform_{{ projectnote.id }}" data-displayid="tr_projectnote_{{ projectnote.id }}" class="projectnote_edit_button">edit</button>
+            </td>
+            <td>
+              {{ projectnote.when }}
+            </td>
+            <td>
+              {{ projectote.text }}
+            </td>
+            <td>
+              {{ projectnote.is_major }}
+            </td>
           </tr>
         {% endfor %}
       </table>
-
       {% include './_form_button.html' with label="Submit Form" button='<button type="submit">Submit</button>' %}
 
     </div>
