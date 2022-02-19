@@ -202,9 +202,6 @@
         {% if 'technician' in show_columns or not show_columns %}
           {% include './_list_head.html' with field=project_labels.technician %}
         {% endif %}
-        {% if 'when' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.when %}
-        {% endif %}
         {% if 'status' in show_columns or not show_columns %}
           {% include './_list_head.html' with field=project_labels.status %}
         {% endif %}
@@ -231,11 +228,6 @@
           {% if 'technician' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=item.technician %}
           {% endif %}
-          {% with when_formatted=item.when|date:'Y-m-d'  %}
-            {% if 'when' in show_columns or not show_columns %}
-              {% include './_list_field.html' with field=when %}
-            {% endif %}
-          {% endwith %}
           {% if 'status' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=item.get_status_display %}
           {% endif %}
