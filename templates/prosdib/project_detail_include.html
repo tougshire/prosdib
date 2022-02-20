@@ -11,7 +11,7 @@
     {% include './_detail_field.html' with label=project_labels.status field=object.get_status_display %}
     {% include './_detail_field.html' with label=project_labels.completion_notes field=object.completion_notes %}
 
-    <h3>Notes</h3><span id="div_relatednotesShowing">Showing All </span><a href="#" id="a_toggleMajor">Show Major</a>
+    <h3>Notes</h3><span id="div_relatednotesShowing">Showing All </span><a href="#" id="a_toggleCurrent">Show Current</a>
     {% user_is_editor object user as editor %}
     <div class="detail-related">
       <div class="relatedheader">
@@ -34,7 +34,7 @@
       </div>
 
     {% for projectnote in object.projectnote_set.all %}
-      <div class="relatedset relatednote{% if projectnote.is_major %} major{% endif %}" id="div_relatednote-{{ forloop.counter0 }}">
+      <div class="relatedset relatednote{% if projectnote.is_current %} current{% endif %}" id="div_relatednote-{{ forloop.counter0 }}">
 
         <div class="field">
               {{ projectnote.when|date:'Y-m-d' }}
@@ -49,7 +49,7 @@
               {{ projectnote.time_spent }}
             </div>
             <div class="field">
-              {{ projectnote.is_major|yesno }}
+              {{ projectnote.is_current|yesno }}
             </div>
 
       </div>
@@ -85,36 +85,36 @@
     }
   </script>
   <script>
-    function toggleMajorNotes() {
+    function toggleCurrentNotes() {
       var relatednotes=document.getElementsByClassName('relatednote')
       var relatednotesShowing = document.getElementById('div_relatednotesShowing')
-      var toggleMajor = document.getElementById('a_toggleMajor')
-      if(toggleMajor.textContent=='Show All '){
+      var toggleCurrent = document.getElementById('a_toggleCurrent')
+      if(toggleCurrent.textContent=='Show All '){
         for(relatednote of relatednotes) {
-          if(!(relatednote.classList.contains('major'))){
+          if(!(relatednote.classList.contains('current'))){
             {% comment %} relatednote.classList.remove('hidden') {% endcomment %}
             relatednote.style.display=null;
 
           }
         }
-        toggleMajor.textContent='Show Major '
+        toggleCurrent.textContent='Show Current '
         relatednotesShowing.textContent='Showing All '
       } else {
         for(relatednote of relatednotes) {
-          if(!(relatednote.classList.contains('major'))){
+          if(!(relatednote.classList.contains('current'))){
             console.log('adding hidden')
             {% comment %} relatednote.classList.add('hidden')  {% endcomment %}
             relatednote.style.display="none";
           }
         }
-        toggleMajor.textContent='Show All '
-        relatednotesShowing.textContent='Showing Major '
+        toggleCurrent.textContent='Show All '
+        relatednotesShowing.textContent='Showing Current '
       }
     }
-    toggleMajorNotes()
-    document.getElementById('a_toggleMajor').addEventListener('click', function(e) {
+    toggleCurrentNotes()
+    document.getElementById('a_toggleCurrent').addEventListener('click', function(e) {
       e.preventDefault()
-      toggleMajorNotes()
+      toggleCurrentNotes()
     });
   </script>
 

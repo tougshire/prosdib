@@ -54,7 +54,7 @@
             {% endfor %}
             {% include './_form_field.html' with field=projectnoteform.when %}
             {% include './_form_field.html' with field=projectnoteform.text %}
-            {% include './_form_field.html' with field=projectnoteform.is_major %}
+            {% include './_form_field.html' with field=projectnoteform.is_current %}
             {% include './_form_field.html' with field=projectnoteform.time_spent %}
             {% include './_form_field.html' with field=projectnoteform.DELETE %}
           </div>
@@ -66,7 +66,7 @@
 
             {% include './_form_field.html' with field=projectnoteform.when %}
             {% include './_form_field.html' with field=projectnoteform.text %}
-            {% include './_form_field.html' with field=projectnoteform.is_major %}
+            {% include './_form_field.html' with field=projectnoteform.is_current %}
             {% include './_form_field.html' with field=projectnoteform.time_spent %}
             {% include './_form_field.html' with field=projectnoteform.DELETE %}
           </div>
@@ -88,7 +88,7 @@
               {{ projectnote.text }}
             </td>
             <td>
-              {{ projectnote.is_major }}
+              {{ projectnote.is_current }}
             </td>
           </tr>
         {% endfor %}

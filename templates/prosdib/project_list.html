@@ -232,7 +232,7 @@
             {% include './_list_field.html' with field=item.get_status_display %}
           {% endif %}
           {% if 'notes' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.get_major_notes %}
+            {% include './_list_field.html' with field=item.get_current_notes %}
           {% endif %}
 
         </div>

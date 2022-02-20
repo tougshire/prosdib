@@ -115,16 +115,16 @@ class Project(models.Model):
     def user_is_editor(self, user):
         return user == self.created_by or user.has_perm('prosdib.change_project')
 
-    def get_major_notes(self):
-        major_notes=[]
+    def get_current_notes(self):
+        current_notes=[]
         if self.completion_notes:
-            major_notes.append('final:{}'.format(self.completion_notes))
+            current_notes.append('final:{}'.format(self.completion_notes))
 
         for note in self.projectnote_set.all():
-            if(note.is_major):
-                major_notes.append('{}: {}'.format(note.when.strftime('%Y-%m-%d'), note.text))
+            if(note.is_current):
+                current_notes.append('{}: {}'.format(note.when.strftime('%Y-%m-%d'), note.text))
 
-        return "\n".join(major_notes)
+        return "\n".join(current_notes)
 
     class Meta:
         ordering=['status', 'priority', 'begin']
@@ -160,8 +160,8 @@ class ProjectNote(models.Model):
         default=0,
         help_text='The amount of time to be added to the project as per this note'
     )
-    is_major = models.BooleanField(
-        'is major or current status',
+    is_current = models.BooleanField(
+        'is current status',
         default=False,
         help_text='If this note is diplayed by default in the project detail view.  If not, it will be displayed when "Show All" is selected'
     )
