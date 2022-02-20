@@ -8,7 +8,7 @@
     {% user_is_editor object user as editor %}
     {% if editor %}
       <div class="menu-item">
-        <a href="{% url 'prosdib:projectprojectnote-create' object.pk %}">Add Note</a>
+        <a id="a_addnote" href="{% url 'prosdib:projectprojectnote-create' object.pk %}">Add Note</a>
       </div>
     {% endif %}
     {% if perms.prosdib.change_project %}
@@ -17,4 +17,10 @@
       </div>
     {% endif %}
   </div>
+  <script>
+    document.getElementById('a_addnote').addEventListener('click', function(e) {
+      e.preventDefault()
+      window.open(e.target.href)
+    });
+  </script>
 {% endblock %}

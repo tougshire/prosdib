@@ -11,7 +11,7 @@
     {% include './_detail_field.html' with label=project_labels.status field=object.get_status_display %}
     {% include './_detail_field.html' with label=project_labels.completion_notes field=object.completion_notes %}
 
-    <h3>Notes</h3>
+    <h3>Notes</h3><span id="div_relatednotesShowing">Showing All </span><a href="#" id="a_toggleMajor">Show Major</a>
     {% user_is_editor object user as editor %}
     <div class="detail-related">
       <div class="relatedheader">
@@ -27,11 +27,16 @@
         <div class="field">
           Time spent
         </div>
+        <div class="field">
+          Is Current
+        </div>
+
       </div>
 
     {% for projectnote in object.projectnote_set.all %}
-      <div class="relatedset relatedprojectnote" id="div_projectnote-{{ forloop.counter0 }}">
-            <div class="field">
+      <div class="relatedset relatednote{% if projectnote.is_major %} major{% endif %}" id="div_relatednote-{{ forloop.counter0 }}">
+
+        <div class="field">
               {{ projectnote.when|date:'Y-m-d' }}
             </div>
             <div class="field">
@@ -43,10 +48,13 @@
             <div class="field">
               {{ projectnote.time_spent }}
             </div>
+            <div class="field">
+              {{ projectnote.is_major|yesno }}
+            </div>
 
       </div>
     {% endfor %}
-    <div class="relatedset relatedprojectnote" id="div_projectnote-empty" style="display:none">
+    <div class="relatedset relatednote" id="div_relatednote-empty" style="display:none">
       <div class="field">
       </div>
       <div class="field">
@@ -59,15 +67,11 @@
   </div>
 
   <script>
-    document.getElementById('a_addnote').addEventListener('click', function(e) {
-      e.preventDefault()
-      window.open(e.target.href)
-    });
     function refreshDiv(fields, model) {
       var emptydiv = document.getElementById('div_' + model + '-empty')
       var newdiv = emptydiv.cloneNode(true)
-      var allProjectnoteDivs = document.getElementsByClassName('relatedprojectnote')
-      newdiv.id = 'div_' + model + '-' + allProjectnoteDivs.length
+      var allRelatednoteDivs = document.getElementsByClassName('relatednote')
+      newdiv.id = 'div_' + model + '-' + allRelatednoteDivs.length
       keys = Object.keys(fields)
       console.log('keys:')
       console.log(keys)
@@ -79,5 +83,38 @@
       newdiv.style.display="block"
       emptydiv.parentNode.insertBefore(newdiv, emptydiv)
     }
+  </script>
+  <script>
+    function toggleMajorNotes() {
+      var relatednotes=document.getElementsByClassName('relatednote')
+      var relatednotesShowing = document.getElementById('div_relatednotesShowing')
+      var toggleMajor = document.getElementById('a_toggleMajor')
+      if(toggleMajor.textContent=='Show All '){
+        for(relatednote of relatednotes) {
+          if(!(relatednote.classList.contains('major'))){
+            {% comment %} relatednote.classList.remove('hidden') {% endcomment %}
+            relatednote.style.display=null;
+
+          }
+        }
+        toggleMajor.textContent='Show Major '
+        relatednotesShowing.textContent='Showing All '
+      } else {
+        for(relatednote of relatednotes) {
+          if(!(relatednote.classList.contains('major'))){
+            console.log('adding hidden')
+            {% comment %} relatednote.classList.add('hidden')  {% endcomment %}
+            relatednote.style.display="none";
+          }
+        }
+        toggleMajor.textContent='Show All '
+        relatednotesShowing.textContent='Showing Major '
+      }
+    }
+    toggleMajorNotes()
+    document.getElementById('a_toggleMajor').addEventListener('click', function(e) {
+      e.preventDefault()
+      toggleMajorNotes()
+    });
   </script>
 
