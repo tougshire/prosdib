@@ -48,7 +48,7 @@ class ProjectProjectNoteForm(forms.ModelForm):
         fields = [
             'when',
             'text',
-            'is_major',
+            'is_current',
             'time_spent',
         ]
         widgets={
