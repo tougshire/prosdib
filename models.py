@@ -155,10 +155,12 @@ class ProjectNote(models.Model):
         default=datetime.now,
         help_text='The date that the note was submitted'
     )
-    time_spent = models.IntegerField(
+    time_spent = models.DecimalField(
         'time spent',
         default=0,
-        help_text='The amount of time to be added to the project as per this note'
+        decimal_places=2,
+        max_digits=6,
+        help_text='The amount of time to be added to the project as per this note.  Use decimal notation (ex 1.25, not 1:15)'
     )
     is_current = models.BooleanField(
         'is current status',
