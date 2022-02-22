@@ -33,6 +33,7 @@ class ProjectForm(forms.ModelForm):
             'status',
             'recipient_emails',
             'completion_notes',
+            'time_spent',
         ]
         widgets = {
             'title':forms.TextInput(attrs={'class':'len75'}),
