@@ -133,6 +133,13 @@ class Project(models.Model):
 
         return "\n".join(current_notes)
 
+    def total_time_spent(self):
+        time_spent = self.time_spent
+        for note in self.projectnote_set.all():
+            time_spent = time_spent + note.time_spent
+
+        return time_spent
+
     class Meta:
         ordering=['status', 'priority', 'begin']
 
