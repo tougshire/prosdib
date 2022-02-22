@@ -108,6 +108,13 @@ class Project(models.Model):
         blank=True,
         help_text='The comma-separated list of emails of those who should get updates on this project.  By default, emails are sent for changes in notes and resolution status'
     )
+    time_spent = models.DecimalField(
+        'time spent',
+        default=0,
+        decimal_places=2,
+        max_digits=6,
+        help_text='The amount of time to be added to the project in addition to time spent logged in notes.  Use decimal notation (ex 1.25, not 1:15)'
+    )
 
     def __str__(self):
         return self.title
