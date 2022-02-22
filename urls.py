@@ -1,15 +1,19 @@
-from django.urls import path
+from django.views.generic.base import RedirectView
+from django.urls import path, reverse_lazy
 from . import views
 
 app_name = 'prosdib'
 
 urlpatterns = [
+    path('', RedirectView.as_view(url=reverse_lazy('prosdib:project-list'))),
+    path('project/', RedirectView.as_view(url=reverse_lazy('prosdib:project-list'))),
     path('project/create/', views.ProjectCreate.as_view(), name='project-create'),
     path('project/<int:pk>/update/', views.ProjectUpdate.as_view(), name='project-update'),
     path('project/<int:pk>/detail/', views.ProjectDetail.as_view(), name='project-detail'),
     path('project/<int:pk>/delete/', views.ProjectSoftDelete.as_view(), name='project-delete'),
     path('project/list/', views.ProjectList.as_view(), name='project-list'),
     path('project/<int:projectpk>/projectnote/create', views.ProjectProjectNoteCreate.as_view(), name='projectprojectnote-create'),
+    path('technician/', RedirectView.as_view(url=reverse_lazy('prosdib:technician-list'))),
     path('technician/create/', views.TechnicianCreate.as_view(), name='technician-create'),
     path('technician/<int:pk>/update/', views.TechnicianUpdate.as_view(), name='technician-update'),
     path('technician/<int:pk>/detail/', views.TechnicianDetail.as_view(), name='technician-detail'),
