@@ -433,7 +433,8 @@ class ProjectProjectNoteCreate(PermissionRequiredMixin, CreateView):
         self.object.submitted_by = technician
         self.object.save()
 
-        send_project_mail(self.object.project, self.request, is_new=False)
+        if not 'donot_send' in self.request.POST:
+            send_project_mail(self.object.project, self.request, is_new=False)
 
         return super().form_valid(form)
 

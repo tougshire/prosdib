@@ -22,7 +22,12 @@
       <div id="div_is_current">
         {% include './_form_field.html' with field=form.is_current %}
       </div>
-
+      <div id="div_is_current">
+        {% include './_form_field.html' with field=form.is_current %}
+      </div>
+      <div id="div_donot_send">
+        {% include './_form_field.html' with field='<input type="checkbox" name="donot_send">' label_tag="Do Not Send Emails" help_text="Do not send emails for this note" %}
+      </div>
       <button type="submit">Submit</button>
     </div>
   </form>
