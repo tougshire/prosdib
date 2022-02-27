@@ -5,6 +5,7 @@
 <html lang='en'>
 <head>
 <title>Project Display Board</title>
+<script src="{% static 'touglates/touglates.js' %}"></script>
 <link rel="stylesheet" href="{% static 'prosdib/prosdib.css' %}">
 {% project_include_file 'main_css' as cssfile %}
 {% if cssfile %}<link rel="stylesheet" href="{% static cssfile %}">{% endif %}
