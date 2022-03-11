@@ -1,14 +1,13 @@
-import json
 import sys
-from urllib import request
+import urllib
 
-from django.apps import AppConfig
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import (PermissionRequiredMixin,
                                         UserPassesTestMixin)
 from django.core.exceptions import FieldError, ObjectDoesNotExist
+from django.http import QueryDict
 from django.core.mail import send_mail
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
@@ -17,12 +16,13 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 from libtekin.models import Item, Location, Mmodel
 from tougshire_vistas.models import Vista
-from tougshire_vistas.views import (delete_vista, get_global_vista,
+from tougshire_vistas.views import (delete_vista, default_vista, get_global_vista,
                                     get_latest_vista, make_vista,
                                     retrieve_vista)
 
-from .forms import ProjectForm, ProjectProjectNoteForm, ProjectProjectNoteFormset, TechnicianForm
-from .models import History, Technician, Project, ProjectNote
+from .forms import (ProjectForm, ProjectProjectNoteForm,
+                    ProjectProjectNoteFormset, TechnicianForm)
+from .models import History, Project, ProjectNote, Technician
 
 
 def update_history(form, modelname, object, user):
@@ -274,6 +274,7 @@ class ProjectList(PermissionRequiredMixin, ListView):
     def setup(self, request, *args, **kwargs):
 
         self.vista_settings={
+            'max_search_keys':5,
             'text_fields_available':[],
             'filter_fields_available':{},
             'order_by_fields_available':[],
@@ -321,6 +322,10 @@ class ProjectList(PermissionRequiredMixin, ListView):
         ]:
             self.vista_settings['columns_available'].append(fieldname)
 
+        self.vista_settings['field_types'] = {
+            'begin':'date',
+        }
+
         self.vista_defaults = {
             'order_by': Project._meta.ordering,
             'filterop__status':'in',
@@ -333,48 +338,50 @@ class ProjectList(PermissionRequiredMixin, ListView):
     def post(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-    def get_queryset(self):
-
-        self.vista_context = {
-            'show_columns':[],
-            'order_by':[],
-            'combined_text_search':'',
-        }
+    def get_queryset(self, **kwargs):
 
         queryset = super().get_queryset()
 
-        vistaobj={'context':{}, 'queryset':queryset}
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
 
         if 'delete_vista' in self.request.POST:
             delete_vista(self.request)
 
         if 'vista_query_submitted' in self.request.POST:
-            vistaobj = make_vista(self.request, self.vista_settings, super().get_queryset(), self.vista_defaults)
+
+            self.vistaobj = make_vista(
+                self.request.user,
+                queryset,
+                self.request.POST,
+                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
+                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
+                self.vista_settings
+            )
         elif 'retrieve_vista' in self.request.POST:
-            vistaobj = retrieve_vista(self.request, self.vista_settings, super().get_queryset(), self.vista_defaults)
-        else:
-            try:
-                vistaobj =  get_latest_vista(self.request, self.vista_settings, super().get_queryset(), self.vista_defaults)
-            except Exception as e:
-                print(e, ' at ', sys.exc_info()[2].tb_lineno)
-                try:
-                    vistaobj =  get_global_vista(self.request, self.vista_settings, super().get_queryset(), self.vista_defaults)
-                except Exception as e:
-                    print(e, ' at ', sys.exc_info()[2].tb_lineno)
+            self.vistaobj = retrieve_vista(
+                self.request.user,
+                queryset,
+                'libtekin.item',
+                self.request.POST.get('vista_name'),
+                self.vista_settings
 
-        for key in vistaobj['context']:
-            self.vista_context[key] = vistaobj['context'][key]
+            )
+        elif 'default_vista' in self.request.POST:
+            print('tp m38830', urllib.parse.urlencode(self.vista_defaults))
+            self.vistaobj = default_vista(
+                self.request.user,
+                queryset,
+                QueryDict(urllib.parse.urlencode(self.vista_defaults)),
+                self.vista_settings
+            )
 
-        queryset = vistaobj['queryset']
 
-        print('tp m2eb22 ordered', queryset.ordered)
-
-        return queryset
+        return self.vistaobj['queryset']
 
     def get_paginate_by(self, queryset):
 
-        if 'paginate_by' in self.vista_context and self.vista_context['paginate_by']:
-            return self.vista_context['paginate_by']
+        if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
+            return self.vistaobj['querydict']['paginate_by']
 
         return super().get_paginate_by(self)
 
@@ -382,7 +389,11 @@ class ProjectList(PermissionRequiredMixin, ListView):
 
         context_data = super().get_context_data(**kwargs)
 
-        context_data['users'] = get_user_model().objects.all()
+        context_data['mmodels'] = Mmodel.objects.all()
+        context_data['items'] = Item.objects.all()
+        context_data['technicians'] = Technician.objects.all()
+        context_data['priorities'] = Project.PRIORITY_CHOICES
+        context_data['statuses'] = Project.STATUS_CHOICES
 
         context_data['order_by_fields_available'] = []
         for fieldname in self.vista_settings['order_by_fields_available']:
@@ -393,24 +404,27 @@ class ProjectList(PermissionRequiredMixin, ListView):
 
         context_data['columns_available'] = [{ 'name':fieldname, 'label':Project._meta.get_field(fieldname).verbose_name.title() } for fieldname in self.vista_settings['columns_available']]
 
-        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='prosdib.project').all()
+        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='prosdib.project').all() # for choosing saved vistas
 
-        if self.request.POST.get('vista__name'):
-            context_data['vista__name'] = self.request.POST.get('vista__name')
+        if self.request.POST.get('vista_name'):
+            context_data['vista_name'] = self.request.POST.get('vista_name')
 
-        if self.vista_context:
-            if 'filter' in self.vista_context:
-                for key in self.vista_context['filter']:
-                    context_data[key] = self.vista_context['filter'][key]
+        vista_querydict = self.vistaobj['querydict']
 
-        for key in [
-            'combined_text_search',
-            'text_fields_chosen',
-            'order_by',
-            'paginate_by'
-            ]:
-            if key in self.vista_context and self.vista_context[key]:
-                context_data[key] = self.vista_context[key]
+        #putting the index before item name to make it easier for the template to iterate
+        context_data['filter'] = []
+        for indx in range( self.vista_settings['max_search_keys']):
+            cdfilter = {}
+            cdfilter['fieldname'] = vista_querydict.get('filter__fieldname__' + str(indx)) if 'filter__fieldname__' + str(indx) in vista_querydict else ''
+            cdfilter['op'] = vista_querydict.get('filter__op__' + str(indx) ) if 'filter__op__' + str(indx) in vista_querydict else ''
+            cdfilter['value'] = vista_querydict.get('filter__value__' + str(indx)) if 'filter__value__' + str(indx) in vista_querydict else ''
+            if cdfilter['op'] in ['in']:
+                cdfilter['value'] = vista_querydict.getlist('filter__value__' + str(indx)) if 'filter__value__'  + str(indx) in vista_querydict else []
+            context_data['filter'].append(cdfilter)
+
+        context_data['order_by'] = vista_querydict.getlist('order_by') if 'order_by' in vista_querydict else Item._meta.ordering
+
+        context_data['combined_text_search'] = vista_querydict.get('combined_text_search') if 'combined_text_search' in vista_querydict else ''
 
         context_data['project_labels'] = { field.name: field.verbose_name.title() for field in Project._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
 
