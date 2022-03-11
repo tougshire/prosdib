@@ -122,7 +122,7 @@ class Project(models.Model):
     def user_is_editor(self, user):
         return user == self.created_by or user.has_perm('prosdib.change_project')
 
-    def get_current_notes(self):
+    def get_current_notes(self, separator="\n"):
         current_notes=[]
         if self.completion_notes:
             current_notes.append('final:{}'.format(self.completion_notes))
@@ -131,7 +131,7 @@ class Project(models.Model):
             if(note.is_current):
                 current_notes.append('{}: {}'.format(note.when.strftime('%Y-%m-%d'), note.text))
 
-        return "\n".join(current_notes)
+        return separator.join(current_notes)
 
     def total_time_spent(self):
         time_spent = self.time_spent
@@ -182,6 +182,8 @@ class ProjectNote(models.Model):
         help_text='If this note is diplayed by default in the project detail view.  If not, it will be displayed when "Show All" is selected'
     )
 
+    class Meta:
+        ordering = ['-when',]
 
     def __str__(self):
         return self.text

@@ -286,7 +286,11 @@
             {% include './_list_field.html' with field=item.time_spent %}
           {% endif %}
           {% if 'notes' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.get_current_notes %}
+            <div class="field column">
+              {% for note in item.projectnote_set.all %}
+                {{ note.when }}: {{ note }}<br>
+              {% endfor %}
+            </div>
           {% endif %}
 
         </div>
