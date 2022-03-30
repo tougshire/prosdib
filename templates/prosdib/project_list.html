@@ -244,8 +244,8 @@
           {% endif %}
           {% if 'notes' in show_columns or not show_columns %}
             <div class="field column">
-              {% for note in item.projectnote_set.all %}
-                {{ note.when }}: {{ note }}<br>
+              {% for note in item.get_current_notes %}
+                {{ note }}<br>
               {% endfor %}
             </div>
           {% endif %}

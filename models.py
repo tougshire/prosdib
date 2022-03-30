@@ -131,7 +131,8 @@ class Project(models.Model):
             if(note.is_current):
                 current_notes.append('{}: {}'.format(note.when.strftime('%Y-%m-%d'), note.text))
 
-        return separator.join(current_notes)
+        return current_notes
+        # return separator.join(current_notes)
 
     def total_time_spent(self):
         time_spent = self.time_spent
