@@ -122,7 +122,7 @@ class Project(models.Model):
     def user_is_editor(self, user):
         return user == self.created_by or user.has_perm('prosdib.change_project')
 
-    def get_current_notes(self, separator="\n"):
+    def get_current_notes(self):
         current_notes=[]
         if self.completion_notes:
             current_notes.append('final:{}'.format(self.completion_notes))

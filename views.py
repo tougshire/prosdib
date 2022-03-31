@@ -73,22 +73,21 @@ def send_project_mail(project, request, is_new=False):
             f"Urgency: { project.get_priority_display() }",
             f"Description: { project.description }",
             f"Project URL: { project_url }",
+            f"Notes:\n" + "\n".join(project.get_current_notes())
         ]
     )
     if project.projectnote_set.all().exists:
-        mail_message = mail_message + "\nNotes:\n" + "\n".join([str(note.when) + ': ' + note.text + ' -- ' + str(note.submitted_by) for note in project.projectnote_set.all()])
+        mail_message = mail_message + "\nNotes:\n" + "\n".join(project.get_current_notes())
 
     mail_html_message = "<br>\n".join(
         [
             f"Title: { project.title }",
             f"Urgency: { project.get_priority_display() }",
             f"Description: { project.description }",
-            f"Project URL: <a href=\"{ project_url }\">{ project_url }</a>"
+            f"Project URL: <a href=\"{ project_url }\">{ project_url }</a>",
+            f"Notes:<br>\n{ project.get_current_notes()}"
         ]
     )
-    if project.projectnote_set.all().exists:
-        mail_html_message = mail_html_message + "<br>Notes:<br>\n" + "<br>\n".join([str(note.when) + ': ' + note.text + ' --' + str(note.submitted_by) for note in project.projectnote_set.all()])
-
 
     mail_recipients = [email.strip() for email in project.recipient_emails.split(',')]
 
@@ -164,7 +163,7 @@ class ProjectCreate(PermissionRequiredMixin, CreateView):
             return self.form_invalid(form)
 
 
-        if not 'donot_send' in self.request.POST:
+        if 'send_mail' in self.request.POST:
             send_project_mail(self.object, self.request, is_new=True)
 
         return response
@@ -218,7 +217,7 @@ class ProjectUpdate(PermissionRequiredMixin, UpdateView):
             print('tp m2if36', projectnotes.errors)
             return self.form_invalid(form)
 
-        if not 'donot_send' in self.request.POST:
+        if not 'send_mail' in self.request.POST:
             send_project_mail(self.object, self.request, is_new=False)
 
         return response
