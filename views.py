@@ -217,7 +217,7 @@ class ProjectUpdate(PermissionRequiredMixin, UpdateView):
             print('tp m2if36', projectnotes.errors)
             return self.form_invalid(form)
 
-        if not 'send_mail' in self.request.POST:
+        if 'send_mail' in self.request.POST:
             send_project_mail(self.object, self.request, is_new=False)
 
         return response
@@ -446,7 +446,7 @@ class ProjectProjectNoteCreate(PermissionRequiredMixin, CreateView):
         self.object.submitted_by = technician
         self.object.save()
 
-        if not 'donot_send' in self.request.POST:
+        if 'send_mail' in self.request.POST:
             send_project_mail(self.object.project, self.request, is_new=False)
 
         return super().form_valid(form)
