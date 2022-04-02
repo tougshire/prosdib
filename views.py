@@ -1,5 +1,6 @@
 import sys
 import urllib
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
@@ -266,6 +267,204 @@ class ProjectSoftDelete(PermissionRequiredMixin, UpdateView):
         return context_data
 
 class ProjectList(PermissionRequiredMixin, ListView):
+    permission_required = 'prosdib.view_project'
+    model = Project
+    paginate_by = 30
+
+    def setup(self, request, *args, **kwargs):
+
+        self.vista_settings={
+            'max_search_keys':10,
+            'text_fields_available':[],
+            'filter_fields_available':{},
+            'order_by_fields_available':[],
+            'columns_available':[],
+        }
+
+        derived_field_labels={ field.name: field.verbose_name.title() for field in Project._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+        more_field_labels={
+            'technician': 'Technician',
+            'created_by': 'Creator',
+
+        }
+        self.field_labels={**derived_field_labels, **more_field_labels}
+
+        self.vista_settings['field_types']={
+            'status':'choice',
+            'priority':'choice',
+            'technician': 'model',
+            'created_by': 'model',
+        }
+
+        self.vista_settings['text_fields_available']=[
+            'title',
+            'description',
+            'created_by',
+            'completion_notes',
+        ]
+
+        self.vista_settings['filter_fields_available'] = [
+            'title',
+            'description',
+            'priority',
+            'begin',
+            'technician',
+            'created_by',
+            'status',
+            'completion_notes',
+            'recipient_emails',
+            'time_spent',
+        ]
+
+        for fieldname in [
+            'title',
+            'description',
+            'priority',
+            'begin',
+            'technician',
+            'created_by',
+            'status',
+            'completion_notes',
+            'recipient_emails',
+            'time_spent',
+        ]:
+            self.vista_settings['order_by_fields_available'].append(fieldname)
+            self.vista_settings['order_by_fields_available'].append('-' + fieldname)
+
+        self.vista_settings['columns_available'] = [
+            'title',
+            'description',
+            'priority',
+            'begin',
+            'technician',
+            'created_by',
+            'status',
+            'completion_notes',
+            'recipient_emails',
+            'time_spent',
+        ]
+
+        self.vista_defaults = QueryDict(urlencode([
+            ('filter__fieldname', ['status']),
+            ('filter__op', ['in']),
+            ('filter__value', [1]),
+            ('order_by', ['priority', 'begin']),
+            ('paginate_by',self.paginate_by),
+        ],doseq=True) )
+
+        return super().setup(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self, **kwargs):
+
+        queryset = super().get_queryset()
+
+        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
+
+        if 'delete_vista' in self.request.POST:
+            delete_vista(self.request)
+
+        if 'query' in self.request.session:
+            querydict = QueryDict(self.request.session.get('query'))
+            self.vistaobj = make_vista(
+                self.request.user,
+                queryset,
+                querydict,
+                '',
+                False,
+                self.vista_settings
+            )
+            del self.request.session['query']
+
+        elif 'vista_query_submitted' in self.request.POST:
+
+            self.vistaobj = make_vista(
+                self.request.user,
+                queryset,
+                self.request.POST,
+                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
+                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
+                self.vista_settings
+            )
+        elif 'retrieve_vista' in self.request.POST:
+            self.vistaobj = retrieve_vista(
+                self.request.user,
+                queryset,
+                'prosdib.project',
+                self.request.POST.get('vista_name'),
+                self.vista_settings
+
+            )
+        else: #elif 'default_vista' in self.request.POST:
+            self.vistaobj = default_vista(
+                self.request.user,
+                queryset,
+                self.vista_defaults,
+                self.vista_settings
+            )
+
+        return self.vistaobj['queryset']
+
+    def get_paginate_by(self, queryset):
+
+        if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
+            return self.vistaobj['querydict']['paginate_by']
+
+        return super().get_paginate_by(self)
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super().get_context_data(**kwargs)
+
+
+        context_data['order_by_fields_available'] = []
+        for fieldname in self.vista_settings['order_by_fields_available']:
+            if fieldname > '' and fieldname[0] == '-':
+                context_data['order_by_fields_available'].append({ 'name':fieldname[1:], 'label':self.field_labels[fieldname[1:]] + ' [Reverse]'})
+            else:
+                context_data['order_by_fields_available'].append({ 'name':fieldname, 'label':self.field_labels[fieldname]})
+
+        context_data['columns_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname] } for fieldname in self.vista_settings['columns_available']]
+
+        options={
+            'status': {'type':'choice', 'values':Project.STATUS_CHOICES, 'attrs':{'multiple':'MULTIPLE',} },
+            'priority': {'type':'choice', 'values':Project.PRIORITY_CHOICES },
+            'technician':{'type':'model', 'values': Technician.objects.all()},
+            'created_by':{'type':'model', 'values': Technician.objects.all()},
+        }
+
+        context_data['filter_fields_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname], 'options':options[fieldname] if fieldname in options else '' } for fieldname in self.vista_settings['filter_fields_available']]
+
+        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='prosdib.project').all() # for choosing saved vistas
+
+        if self.request.POST.get('vista_name'):
+            context_data['vista_name'] = self.request.POST.get('vista_name')
+
+        vista_querydict = self.vistaobj['querydict']
+
+        #putting the index before project name to make it easier for the template to iterate
+        context_data['filter'] = []
+        for indx in range( self.vista_settings['max_search_keys']):
+            cdfilter = {}
+            cdfilter['fieldname'] = vista_querydict.get('filter__fieldname__' + str(indx)) if 'filter__fieldname__' + str(indx) in vista_querydict else ''
+            cdfilter['op'] = vista_querydict.get('filter__op__' + str(indx) ) if 'filter__op__' + str(indx) in vista_querydict else ''
+            cdfilter['value'] = vista_querydict.get('filter__value__' + str(indx)) if 'filter__value__' + str(indx) in vista_querydict else ''
+            if cdfilter['op'] in ['in', 'range']:
+                cdfilter['value'] = vista_querydict.getlist('filter__value__' + str(indx)) if 'filter__value__'  + str(indx) in vista_querydict else []
+            context_data['filter'].append(cdfilter)
+
+        context_data['order_by'] = vista_querydict.getlist('order_by') if 'order_by' in vista_querydict else Project._meta.ordering
+
+        context_data['combined_text_search'] = vista_querydict.get('combined_text_search') if 'combined_text_search' in vista_querydict else ''
+
+        context_data['project_labels'] = { field.name: field.verbose_name.title() for field in Project._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
+
+        return context_data
+
+
+class xxxProjectList(PermissionRequiredMixin, ListView):
     permission_required = 'prosdib.view_project'
     model = Project
     paginate_by = 30
