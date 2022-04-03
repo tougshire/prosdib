@@ -282,12 +282,12 @@ class ProjectList(PermissionRequiredMixin, ListView):
         }
 
         derived_field_labels={ field.name: field.verbose_name.title() for field in Project._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
-        more_field_labels={
+        explicit_field_labels={
             'technician': 'Technician',
             'created_by': 'Creator',
 
         }
-        self.field_labels={**derived_field_labels, **more_field_labels}
+        self.field_labels={**derived_field_labels, **explicit_field_labels}
 
         self.vista_settings['field_types']={
             'status':'choice',
