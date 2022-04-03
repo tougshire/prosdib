@@ -274,7 +274,7 @@ class ProjectList(PermissionRequiredMixin, ListView):
     def setup(self, request, *args, **kwargs):
 
         self.vista_settings={
-            'max_search_keys':10,
+            'max_search_keys':5 ,
             'text_fields_available':[],
             'filter_fields_available':{},
             'order_by_fields_available':[],
@@ -429,10 +429,10 @@ class ProjectList(PermissionRequiredMixin, ListView):
         context_data['columns_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname] } for fieldname in self.vista_settings['columns_available']]
 
         options={
-            'status': {'type':'choice', 'values':Project.STATUS_CHOICES, 'attrs':{'multiple':'MULTIPLE',} },
-            'priority': {'type':'choice', 'values':Project.PRIORITY_CHOICES },
-            'technician':{'type':'model', 'values': Technician.objects.all()},
-            'created_by':{'type':'model', 'values': Technician.objects.all()},
+            'status': {'type':self.vista_settings['field_types']['status'], 'values':Project.STATUS_CHOICES, 'attrs':{'multiple':'MULTIPLE',} },
+            'priority': {'type':self.vista_settings['field_types']['priority'], 'values':Project.PRIORITY_CHOICES },
+            'technician':{'type':self.vista_settings['field_types']['technician'], 'values': Technician.objects.all()},
+            'created_by':{'type':self.vista_settings['field_types']['created_by'], 'values': Technician.objects.all()},
         }
 
         context_data['filter_fields_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname], 'options':options[fieldname] if fieldname in options else '' } for fieldname in self.vista_settings['filter_fields_available']]
@@ -444,6 +444,7 @@ class ProjectList(PermissionRequiredMixin, ListView):
 
         vista_querydict = self.vistaobj['querydict']
 
+        context_data['max_search_keys'] = self.vista_settings['max_search_keys']
         #putting the index before project name to make it easier for the template to iterate
         context_data['filter'] = []
         for indx in range( self.vista_settings['max_search_keys']):
