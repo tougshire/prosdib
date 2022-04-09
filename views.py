@@ -274,7 +274,7 @@ class ProjectList(PermissionRequiredMixin, ListView):
     def setup(self, request, *args, **kwargs):
 
         self.vista_settings={
-            'max_search_keys':10,
+            'max_search_keys':5,
             'fields':[],
         }
 
