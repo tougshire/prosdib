@@ -365,7 +365,7 @@ class ProjectList(PermissionRequiredMixin, ListView):
         vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
         context_data = {**context_data, **vista_data}
 
-        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='sdcpeople.person').all() # for choosing saved vistas
+        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='libtekin.project').all() # for choosing saved vistas
 
         if self.request.POST.get('vista_name'):
             context_data['vista_name'] = self.request.POST.get('vista_name')
