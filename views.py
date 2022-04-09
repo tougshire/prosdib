@@ -19,7 +19,7 @@ from libtekin.models import Item, Location, Mmodel
 from tougshire_vistas.models import Vista
 from tougshire_vistas.views import (delete_vista, default_vista, get_global_vista,
                                     get_latest_vista, make_vista,
-                                    retrieve_vista)
+                                    retrieve_vista, vista_context_data, vista_fields)
 
 from .forms import (ProjectForm, ProjectProjectNoteForm,
                     ProjectProjectNoteFormset, TechnicianForm)
@@ -215,7 +215,7 @@ class ProjectUpdate(PermissionRequiredMixin, UpdateView):
                     projectnote.submitted_by = technician
             projectnotes.save()
         else:
-            print('tp m2if36', projectnotes.errors)
+            print(projectnotes.errors)
             return self.form_invalid(form)
 
         if 'send_mail' in self.request.POST:
@@ -274,75 +274,19 @@ class ProjectList(PermissionRequiredMixin, ListView):
     def setup(self, request, *args, **kwargs):
 
         self.vista_settings={
-            'max_search_keys':5 ,
-            'text_fields_available':[],
-            'filter_fields_available':{},
-            'order_by_fields_available':[],
-            'columns_available':[],
+            'max_search_keys':10,
+            'fields':[],
         }
 
-        derived_field_labels={ field.name: field.verbose_name.title() for field in Project._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
-        explicit_field_labels={
-            'technician': 'Technician',
-            'created_by': 'Creator',
-
+        self.vista_settings['fields'] = vista_fields(Project, rels=True)
+        del(self.vista_settings['fields']['projectnote'])
+        self.vista_settings['fields']['projectnote__text'] = {
+            'label':'Notes',
+            'available_for':[
+                'quicksearch',
+                'columns'
+            ]
         }
-        self.field_labels={**derived_field_labels, **explicit_field_labels}
-
-        self.vista_settings['field_types']={
-            'status':'choice',
-            'priority':'choice',
-            'technician': 'model',
-            'created_by': 'model',
-        }
-
-        self.vista_settings['text_fields_available']=[
-            'title',
-            'description',
-            'created_by',
-            'completion_notes',
-        ]
-
-        self.vista_settings['filter_fields_available'] = [
-            'title',
-            'description',
-            'priority',
-            'begin',
-            'technician',
-            'created_by',
-            'status',
-            'completion_notes',
-            'recipient_emails',
-            'time_spent',
-        ]
-
-        for fieldname in [
-            'title',
-            'description',
-            'priority',
-            'begin',
-            'technician',
-            'created_by',
-            'status',
-            'completion_notes',
-            'recipient_emails',
-            'time_spent',
-        ]:
-            self.vista_settings['order_by_fields_available'].append(fieldname)
-            self.vista_settings['order_by_fields_available'].append('-' + fieldname)
-
-        self.vista_settings['columns_available'] = [
-            'title',
-            'description',
-            'priority',
-            'begin',
-            'technician',
-            'created_by',
-            'status',
-            'completion_notes',
-            'recipient_emails',
-            'time_spent',
-        ]
 
         self.vista_defaults = QueryDict(urlencode([
             ('filter__fieldname', ['status']),
@@ -418,216 +362,17 @@ class ProjectList(PermissionRequiredMixin, ListView):
 
         context_data = super().get_context_data(**kwargs)
 
+        vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
+        context_data = {**context_data, **vista_data}
 
-        context_data['order_by_fields_available'] = []
-        for fieldname in self.vista_settings['order_by_fields_available']:
-            if fieldname > '' and fieldname[0] == '-':
-                context_data['order_by_fields_available'].append({ 'name':fieldname[1:], 'label':self.field_labels[fieldname[1:]] + ' [Reverse]'})
-            else:
-                context_data['order_by_fields_available'].append({ 'name':fieldname, 'label':self.field_labels[fieldname]})
-
-        context_data['columns_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname] } for fieldname in self.vista_settings['columns_available']]
-
-        options={
-            'status': {'type':self.vista_settings['field_types']['status'], 'values':Project.STATUS_CHOICES, 'attrs':{'multiple':'MULTIPLE',} },
-            'priority': {'type':self.vista_settings['field_types']['priority'], 'values':Project.PRIORITY_CHOICES },
-            'technician':{'type':self.vista_settings['field_types']['technician'], 'values': Technician.objects.all()},
-            'created_by':{'type':self.vista_settings['field_types']['created_by'], 'values': Technician.objects.all()},
-        }
-
-        context_data['filter_fields_available'] = [{ 'name':fieldname, 'label':self.field_labels[fieldname], 'options':options[fieldname] if fieldname in options else '' } for fieldname in self.vista_settings['filter_fields_available']]
-
-        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='prosdib.project').all() # for choosing saved vistas
+        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='sdcpeople.person').all() # for choosing saved vistas
 
         if self.request.POST.get('vista_name'):
             context_data['vista_name'] = self.request.POST.get('vista_name')
 
-        vista_querydict = self.vistaobj['querydict']
-
-        context_data['max_search_keys'] = self.vista_settings['max_search_keys']
-        #putting the index before project name to make it easier for the template to iterate
-        context_data['filter'] = []
-        for indx in range( self.vista_settings['max_search_keys']):
-            cdfilter = {}
-            cdfilter['fieldname'] = vista_querydict.get('filter__fieldname__' + str(indx)) if 'filter__fieldname__' + str(indx) in vista_querydict else ''
-            cdfilter['op'] = vista_querydict.get('filter__op__' + str(indx) ) if 'filter__op__' + str(indx) in vista_querydict else ''
-            cdfilter['value'] = vista_querydict.get('filter__value__' + str(indx)) if 'filter__value__' + str(indx) in vista_querydict else ''
-            if cdfilter['op'] in ['in', 'range']:
-                cdfilter['value'] = vista_querydict.getlist('filter__value__' + str(indx)) if 'filter__value__'  + str(indx) in vista_querydict else []
-            context_data['filter'].append(cdfilter)
-
-        context_data['order_by'] = vista_querydict.getlist('order_by') if 'order_by' in vista_querydict else Project._meta.ordering
-
-        context_data['combined_text_search'] = vista_querydict.get('combined_text_search') if 'combined_text_search' in vista_querydict else ''
-
-        context_data['project_labels'] = { field.name: field.verbose_name.title() for field in Project._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
-
         return context_data
 
 
-class xxxProjectList(PermissionRequiredMixin, ListView):
-    permission_required = 'prosdib.view_project'
-    model = Project
-    paginate_by = 30
-
-    def setup(self, request, *args, **kwargs):
-
-        self.vista_settings={
-            'max_search_keys':5,
-            'text_fields_available':[],
-            'filter_fields_available':{},
-            'order_by_fields_available':[],
-            'columns_available':[]
-        }
-
-        self.vista_settings['text_fields_available']=[
-            'title',
-            'description',
-            'completion_notes',
-        ]
-
-        self.vista_settings['filter_fields_available'] = [
-            'title',
-            'description',
-            'priority',
-            'begin',
-            'technician',
-            'created_by',
-            'status',
-            'completion_notes',
-        ]
-
-        for fieldname in [
-            'title',
-            'priority',
-            'begin',
-            'technician',
-            'created_by',
-            'status',
-        ]:
-            self.vista_settings['order_by_fields_available'].append(fieldname)
-            self.vista_settings['order_by_fields_available'].append('-' + fieldname)
-
-        for fieldname in [
-            'title',
-            'description',
-            'priority',
-            'begin',
-            'technician',
-            'created_by',
-            'status',
-            'completion_notes',
-            'recipient_emails',
-        ]:
-            self.vista_settings['columns_available'].append(fieldname)
-
-        self.vista_settings['field_types'] = {
-            'begin':'date',
-        }
-
-        self.vista_defaults = {
-            'order_by': Project._meta.ordering,
-            'filterop__status':'in',
-            'filterfield__status': (1,2,3),
-            'paginate_by':self.paginate_by
-        }
-
-        return super().setup(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-    def get_queryset(self, **kwargs):
-
-        queryset = super().get_queryset()
-
-        self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
-
-        if 'delete_vista' in self.request.POST:
-            delete_vista(self.request)
-
-        if 'vista_query_submitted' in self.request.POST:
-
-            self.vistaobj = make_vista(
-                self.request.user,
-                queryset,
-                self.request.POST,
-                self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
-                self.vista_settings
-            )
-        elif 'retrieve_vista' in self.request.POST:
-            self.vistaobj = retrieve_vista(
-                self.request.user,
-                queryset,
-                'libtekin.item',
-                self.request.POST.get('vista_name'),
-                self.vista_settings
-
-            )
-        elif 'default_vista' in self.request.POST:
-            print('tp m38830', urllib.parse.urlencode(self.vista_defaults))
-            self.vistaobj = default_vista(
-                self.request.user,
-                queryset,
-                QueryDict(urllib.parse.urlencode(self.vista_defaults)),
-                self.vista_settings
-            )
-
-
-        return self.vistaobj['queryset']
-
-    def get_paginate_by(self, queryset):
-
-        if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
-            return self.vistaobj['querydict']['paginate_by']
-
-        return super().get_paginate_by(self)
-
-    def get_context_data(self, **kwargs):
-
-        context_data = super().get_context_data(**kwargs)
-
-        context_data['mmodels'] = Mmodel.objects.all()
-        context_data['items'] = Item.objects.all()
-        context_data['technicians'] = Technician.objects.all()
-        context_data['priorities'] = Project.PRIORITY_CHOICES
-        context_data['statuses'] = Project.STATUS_CHOICES
-
-        context_data['order_by_fields_available'] = []
-        for fieldname in self.vista_settings['order_by_fields_available']:
-            if fieldname > '' and fieldname[0] == '-':
-                context_data['order_by_fields_available'].append({ 'name':fieldname, 'label':Project._meta.get_field(fieldname[1:]).verbose_name.title() + ' [Reverse]'})
-            else:
-                context_data['order_by_fields_available'].append({ 'name':fieldname, 'label':Project._meta.get_field(fieldname).verbose_name.title()})
-
-        context_data['columns_available'] = [{ 'name':fieldname, 'label':Project._meta.get_field(fieldname).verbose_name.title() } for fieldname in self.vista_settings['columns_available']]
-
-        context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='prosdib.project').all() # for choosing saved vistas
-
-        if self.request.POST.get('vista_name'):
-            context_data['vista_name'] = self.request.POST.get('vista_name')
-
-        vista_querydict = self.vistaobj['querydict']
-
-        #putting the index before item name to make it easier for the template to iterate
-        context_data['filter'] = []
-        for indx in range( self.vista_settings['max_search_keys']):
-            cdfilter = {}
-            cdfilter['fieldname'] = vista_querydict.get('filter__fieldname__' + str(indx)) if 'filter__fieldname__' + str(indx) in vista_querydict else ''
-            cdfilter['op'] = vista_querydict.get('filter__op__' + str(indx) ) if 'filter__op__' + str(indx) in vista_querydict else ''
-            cdfilter['value'] = vista_querydict.get('filter__value__' + str(indx)) if 'filter__value__' + str(indx) in vista_querydict else ''
-            if cdfilter['op'] in ['in']:
-                cdfilter['value'] = vista_querydict.getlist('filter__value__' + str(indx)) if 'filter__value__'  + str(indx) in vista_querydict else []
-            context_data['filter'].append(cdfilter)
-
-        context_data['order_by'] = vista_querydict.getlist('order_by') if 'order_by' in vista_querydict else Item._meta.ordering
-
-        context_data['combined_text_search'] = vista_querydict.get('combined_text_search') if 'combined_text_search' in vista_querydict else ''
-
-        context_data['project_labels'] = { field.name: field.verbose_name.title() for field in Project._meta.get_fields() if type(field).__name__[-3:] != 'Rel' }
-
-        return context_data
 
 class ProjectProjectNoteCreate(PermissionRequiredMixin, CreateView):
     permission_required = 'prosdib.add_projectnote'
