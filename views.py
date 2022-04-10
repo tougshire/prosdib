@@ -269,7 +269,7 @@ class ProjectSoftDelete(PermissionRequiredMixin, UpdateView):
 class ProjectList(PermissionRequiredMixin, ListView):
     permission_required = 'prosdib.view_project'
     model = Project
-    paginate_by = 30
+    # paginate_by = 30
 
     def setup(self, request, *args, **kwargs):
 
@@ -293,7 +293,7 @@ class ProjectList(PermissionRequiredMixin, ListView):
             ('filter__op', ['in']),
             ('filter__value', [1]),
             ('order_by', ['priority', 'begin']),
-            ('paginate_by',self.paginate_by),
+            # ('paginate_by',self.paginate_by),
         ],doseq=True) )
 
         return super().setup(request, *args, **kwargs)
@@ -351,12 +351,12 @@ class ProjectList(PermissionRequiredMixin, ListView):
 
         return self.vistaobj['queryset']
 
-    def get_paginate_by(self, queryset):
+    # def get_paginate_by(self, queryset):
 
-        if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
-            return self.vistaobj['querydict']['paginate_by']
+    #     if 'paginate_by' in self.vistaobj['querydict'] and self.vistaobj['querydict']['paginate_by']:
+    #         return self.vistaobj['querydict']['paginate_by']
 
-        return super().get_paginate_by(self)
+    #     return super().get_paginate_by(self)
 
     def get_context_data(self, **kwargs):
 
