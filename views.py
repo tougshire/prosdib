@@ -19,7 +19,7 @@ from libtekin.models import Item, Location, Mmodel
 from tougshire_vistas.models import Vista
 from tougshire_vistas.views import (delete_vista, default_vista, get_global_vista,
                                     get_latest_vista, make_vista,
-                                    retrieve_vista, vista_context_data, vista_fields)
+                                    retrieve_vista, vista_context_data, make_vista_fields)
 
 from .forms import (ProjectForm, ProjectProjectNoteForm,
                     ProjectProjectNoteFormset, TechnicianForm)
@@ -278,7 +278,7 @@ class ProjectList(PermissionRequiredMixin, ListView):
             'fields':[],
         }
 
-        self.vista_settings['fields'] = vista_fields(Project, rels=True)
+        self.vista_settings['fields'] = make_vista_fields(Project, rels=True)
         del(self.vista_settings['fields']['projectnote'])
         self.vista_settings['fields']['projectnote__text'] = {
             'label':'Notes',
