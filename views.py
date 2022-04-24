@@ -278,21 +278,21 @@ class ProjectList(PermissionRequiredMixin, ListView):
             'fields':[],
         }
 
-        self.vista_settings['fields'] = make_vista_fields(Project, rels=True)
-        del(self.vista_settings['fields']['projectnote'])
-        self.vista_settings['fields']['projectnote__text'] = {
-            'label':'Notes',
-            'available_for':[
-                'quicksearch',
-                'columns'
-            ]
-        }
+        self.vista_settings['fields'] = make_vista_fields(Project, field_names = [
+            'title',
+            'description',
+            'priority',
+            'begin',
+            'technician',
+            'created_by',
+            'status',
+        ])
 
         self.vista_defaults = QueryDict(urlencode([
-            ('filter__fieldname', ['status']),
-            ('filter__op', ['in']),
-            ('filter__value', [1]),
-            ('order_by', ['priority', 'begin']),
+            ('filter__fieldname__0', ['status']),
+            ('filter__op__0', ['in']),
+            ('filter__value__0', [Project.STATUS_NOTASSIGNED, Project.STATUS_INPROGRESS, Project.STATUS_PAUSED]),
+            ('order_by', ['priority', 'status']),
             ('paginate_by',self.paginate_by),
         ],doseq=True) )
 
@@ -363,6 +363,7 @@ class ProjectList(PermissionRequiredMixin, ListView):
         context_data = super().get_context_data(**kwargs)
 
         vista_data = vista_context_data(self.vista_settings, self.vistaobj['querydict'])
+
         context_data = {**context_data, **vista_data}
 
         context_data['vistas'] = Vista.objects.filter(user=self.request.user, model_name='libtekin.project').all() # for choosing saved vistas
