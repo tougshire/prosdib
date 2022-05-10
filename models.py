@@ -5,6 +5,33 @@ from django.apps import apps
 from libtekin.models import Item, Location
 from django.contrib.auth import get_user_model
 
+class Status(models.Model):
+    name = models.CharField(
+        'name',
+        max_length=50,
+        blank=True,
+        help_text='The name of the technician'
+    )
+    list_position = models.IntegerField(
+        'list position',
+        default = 10000,
+        help_text = 'The position of this status in a list, not sorted by other fields'
+    )
+    is_active = models.BooleanField(
+        'is active',
+        default=True,
+        help_text='If this status means the project is active '
+    )
+    is_default = models.BooleanField(
+        'default',
+        default=False,
+        help_text='If this status is the default for new projects.  Only one should be chosen'
+    )
+
+    def __str__(self):
+        return f"{self.name}"
+
+
 class Technician(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -97,6 +124,13 @@ class Project(models.Model):
         choices=STATUS_CHOICES,
         default=1,
         help_text = 'The status of the project'
+    )
+    status_new = models.ForeignKey(
+        Status,
+        verbose_name = 'status',
+        on_delete = models.SET_NULL,
+        null=True,
+        help_text = 'The status of this project'
     )
     completion_notes = models.TextField(
         'resolution notes',

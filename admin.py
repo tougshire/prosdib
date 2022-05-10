@@ -1,8 +1,8 @@
 from django.contrib import admin
-from .models import Project, Technician, ProjectNote
+from .models import Project, Technician, ProjectNote, Status
 
 class ProjectAdmin(admin.ModelAdmin):
-    list_display=('title', 'technician', 'status')
+    list_display=('title', 'technician', 'status', 'status_new')
     fields=(
         'title',
         'description',
@@ -23,3 +23,5 @@ class TechnicianAdmin(admin.ModelAdmin):
 admin.site.register(Technician, TechnicianAdmin)
 
 admin.site.register(ProjectNote)
+
+admin.site.register(Status)
