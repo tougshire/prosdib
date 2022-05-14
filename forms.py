@@ -31,7 +31,7 @@ class ProjectForm(forms.ModelForm):
             'priority',
             'technician',
             'status',
-            'status_new',
+            'status',
             'recipient_emails',
             'completion_notes',
             'time_spent',

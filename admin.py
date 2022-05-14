@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Project, Technician, ProjectNote, Status
 
 class ProjectAdmin(admin.ModelAdmin):
-    list_display=('title', 'technician', 'status', 'status_new')
+    list_display=('title', 'technician', 'status',)
     fields=(
         'title',
         'description',

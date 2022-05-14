@@ -16,10 +16,6 @@ def forwards_func(apps, schema_editor):
         project.status_new = status
         project.save()
 
-    for status_choice in Project.STATUS_CHOICES:
-        status, created = Status.objects.get_or_create(
-            name = status_choice[1]
-        )
 
 def reverse_func(apps, schema_editor):
     # forwards_func() creates two Status instances,

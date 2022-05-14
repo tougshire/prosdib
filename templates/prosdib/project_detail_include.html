@@ -8,7 +8,7 @@
     {% include './_detail_field.html' with label=project_labels.technician field=object.technician %}
     {% include './_detail_field.html' with label=project_labels.created_by field=object.created_by %}
     {% include './_detail_field.html' with label=project_labels.begin field=object.begin %}
-    {% include './_detail_field.html' with label=project_labels.status field=object.get_status_display %}
+    {% include './_detail_field.html' with label=project_labels.status field=object.status %}
     {% include './_detail_field.html' with label=project_labels.completion_notes field=object.completion_notes %}
     {% include './_detail_field.html' with label='Total time spent' field=object.total_time_spent %}
 

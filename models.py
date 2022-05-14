@@ -69,18 +69,6 @@ class Project(models.Model):
             (4, '4) Fix a Moderately Important Issue or Implement a Moderately Importent Solution'),
             (5, '5) Fix a Minor Issue or implement a minor improvement')
     )
-    STATUS_CHOICES = (
-            (0, 'Not assigned'),
-            (1, 'In progress'),
-            (2, 'Paused'),
-            (3, 'Canceled'),
-            (4, 'Completed'),
-    )
-    STATUS_NOTASSIGNED=0
-    STATUS_INPROGRESS=1
-    STATUS_PAUSED=2
-    STATUS_CANCELED=3
-    STATUS_COMPLETED=4
 
     title = models.CharField(
         'title',
@@ -119,13 +107,7 @@ class Project(models.Model):
         related_name='project_created',
         help_text='The technician who created this project'
     )
-    status = models.IntegerField(
-        'status',
-        choices=STATUS_CHOICES,
-        default=1,
-        help_text = 'The status of the project'
-    )
-    status_new = models.ForeignKey(
+    status = models.ForeignKey(
         Status,
         verbose_name = 'status',
         on_delete = models.SET_NULL,

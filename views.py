@@ -289,9 +289,9 @@ class ProjectList(PermissionRequiredMixin, ListView):
         ])
 
         self.vista_defaults = QueryDict(urlencode([
-            ('filter__fieldname__0', ['status']),
-            ('filter__op__0', ['in']),
-            ('filter__value__0', [Project.STATUS_NOTASSIGNED, Project.STATUS_INPROGRESS, Project.STATUS_PAUSED]),
+            ('filter__fieldname__0', ['status__is_active']),
+            ('filter__op__0', ['exact']),
+            ('filter__value__0', [True]),
             ('order_by', ['priority', 'status']),
             ('paginate_by',self.paginate_by),
         ],doseq=True) )

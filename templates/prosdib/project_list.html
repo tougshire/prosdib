@@ -52,7 +52,7 @@
             {% include './_list_field.html' with field=item.technician %}
           {% endif %}
           {% if 'status' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.get_status_display %}
+            {% include './_list_field.html' with field=item.status %}
           {% endif %}
           {% if 'time_spent' in show_columns or not show_columns %}
             {% include './_list_field.html' with field=item.time_spent %}
