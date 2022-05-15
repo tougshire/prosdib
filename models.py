@@ -31,6 +31,9 @@ class Status(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    class Meta:
+        ordering=('list_position', 'name',)
+
 
 class Technician(models.Model):
     user = models.ForeignKey(
