@@ -24,4 +24,7 @@ admin.site.register(Technician, TechnicianAdmin)
 
 admin.site.register(ProjectNote)
 
-admin.site.register(Status)
+class StatusAdmin(admin.ModelAdmin):
+    list_display=('name', 'is_active', 'is_default',)
+
+admin.site.register(Status, StatusAdmin)
