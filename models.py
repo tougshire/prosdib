@@ -5,6 +5,12 @@ from django.apps import apps
 from libtekin.models import Item, Location
 from django.contrib.auth import get_user_model
 
+def get_default_status():
+    try:
+        return Status.objects.filter(is_default=True).first().pk
+    except AttributeError:
+        return None
+
 class Status(models.Model):
     name = models.CharField(
         'name',
@@ -115,7 +121,7 @@ class Project(models.Model):
         verbose_name = 'status',
         on_delete = models.SET_NULL,
         null=True,
-        default = Status.objects.filter(is_default=True).first().pk,
+        default = get_default_status,
         help_text = 'The status of this project'
     )
     completion_notes = models.TextField(
