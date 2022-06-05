@@ -37,8 +37,8 @@ class ProjectForm(forms.ModelForm):
             'time_spent',
         ]
         widgets = {
-            'title':forms.TextInput(attrs={'class':'len75'}),
-            'description':forms.Textarea(attrs={'class':'len75'}),
+            'title':forms.TextInput(attrs={'class':'widthlong'}),
+            'description':forms.Textarea(attrs={'class':'widthlong'}),
             'begin':forms.DateTimeInput(format='%Y-%m-%dT%H:%M:%S',  attrs={'type':'datetime-local'} ),
 
         }
