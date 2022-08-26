@@ -5,70 +5,71 @@
 
   <div class="list">
     <div><a href="{% url 'prosdib:project-create' %}">create</a></div>
-      <div class="row rowhead">
-        {% include './_list_head.html' with field='' %}
-        {% if 'title' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.title %}
-        {% endif %}
-        {% if 'description' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.description %}
-        {% endif %}
-        {% if 'priority' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.priority %}
-        {% endif %}
-        {% if 'begin' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.begin %}
-        {% endif %}
-        {% if 'technician' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.technician %}
-        {% endif %}
-        {% if 'status' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field=project_labels.status %}
-        {% endif %}
-        {% if 'time_spent' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field='Time Spent' %}
-        {% endif %}
-        {% if 'notes' in show_columns or not show_columns %}
-          {% include './_list_head.html' with field='Notes' %}
-        {% endif %}
-      </div>
-
-      {% for item in object_list %}
-        <div class="row">
-          <div class="listfield"><a href="{% url 'prosdib:project-detail' item.pk %}">view</a></div>
-          {% if 'item' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.title %}
+      <table>
+        <tr class="row rowhead">
+          {% include 'touglates\/list_field.html' with field='' tag='th' %}
+          {% if 'title' in show_columns or not show_columns %}
+            {% include 'touglates\/list_field.html' with field=project_labels.title tag='th' %}
           {% endif %}
           {% if 'description' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.description %}
+            {% include 'touglates\/list_field.html' with field=project_labels.description tag='th' %}
           {% endif %}
           {% if 'priority' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.priority %}
+            {% include 'touglates\/list_field.html' with field=project_labels.priority tag='th' %}
           {% endif %}
           {% if 'begin' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.begin|date:'Y-m-d' %}
+            {% include 'touglates\/list_field.html' with field=project_labels.begin tag='th' %}
           {% endif %}
           {% if 'technician' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.technician %}
+            {% include 'touglates\/list_field.html' with field=project_labels.technician tag='th' %}
           {% endif %}
           {% if 'status' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.status %}
+            {% include 'touglates\/list_field.html' with field=project_labels.status tag='th' %}
           {% endif %}
           {% if 'time_spent' in show_columns or not show_columns %}
-            {% include './_list_field.html' with field=item.time_spent %}
+            {% include 'touglates\/list_field.html' with field='Time Spent' tag='th' %}
           {% endif %}
           {% if 'notes' in show_columns or not show_columns %}
-            <div class="field column">
+            {% include 'touglates\/list_field.html' with field='Notes' tag='th' %}
+          {% endif %}
+        </tr>
+
+      {% for item in object_list %}
+        <tr class="row">
+          <td class="listfield"><a href="{% url 'prosdib:project-detail' item.pk %}">view</a></td>
+          {% if 'item' in show_columns or not show_columns %}
+            {% include 'touglates\/list_field.html' with field=item.title tag="td" %}
+          {% endif %}
+          {% if 'description' in show_columns or not show_columns %}
+            {% include 'touglates\/list_field.html' with field=item.description tag="td" %}
+          {% endif %}
+          {% if 'priority' in show_columns or not show_columns %}
+            {% include 'touglates\/list_field.html' with field=item.priority tag="td" %}
+          {% endif %}
+          {% if 'begin' in show_columns or not show_columns %}
+            {% include 'touglates\/list_field.html' with field=item.begin|date:'Y-m-d' tag="td" %}
+          {% endif %}
+          {% if 'technician' in show_columns or not show_columns %}
+            {% include 'touglates\/list_field.html' with field=item.technician tag="td" %}
+          {% endif %}
+          {% if 'status' in show_columns or not show_columns %}
+            {% include 'touglates\/list_field.html' with field=item.status tag="td" %}
+          {% endif %}
+          {% if 'time_spent' in show_columns or not show_columns %}
+            {% include 'touglates\/list_field.html' with field=item.time_spent tag="td" %}
+          {% endif %}
+          {% if 'notes' in show_columns or not show_columns %}
+            <td class="field column">
               {% for note in item.get_current_notes %}
                 {{ note }}<br>
               {% endfor %}
-            </div>
+            </td>
           {% endif %}
 
-        </div>
+          </tr>
       {% endfor %}
 
-    </div>
+        </table>
   </div>
   <div class="pagination">
     <span class="step-links">
