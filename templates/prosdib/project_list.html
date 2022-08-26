@@ -9,22 +9,22 @@
         <tr class="row rowhead">
           {% include 'touglates/list_field.html' with field='' tag='th' %}
           {% if 'title' in show_columns or not show_columns %}
-            {% include 'touglates/list_field.html' with field=project_labels.title tag='th' %}
+            {% include 'touglates/list_field.html' with field="Title" tag='th' %}
           {% endif %}
           {% if 'description' in show_columns or not show_columns %}
-            {% include 'touglates/list_field.html' with field=project_labels.description tag='th' %}
+            {% include 'touglates/list_field.html' with field='Description' tag='th' %}
           {% endif %}
           {% if 'priority' in show_columns or not show_columns %}
-            {% include 'touglates/list_field.html' with field=project_labels.priority tag='th' %}
+            {% include 'touglates/list_field.html' with field='Priority' tag='th' %}
           {% endif %}
           {% if 'begin' in show_columns or not show_columns %}
-            {% include 'touglates/list_field.html' with field=project_labels.begin tag='th' %}
+            {% include 'touglates/list_field.html' with field='Start' tag='th' %}
           {% endif %}
           {% if 'technician' in show_columns or not show_columns %}
-            {% include 'touglates/list_field.html' with field=project_labels.technician tag='th' %}
+            {% include 'touglates/list_field.html' with field='Tech' tag='th' %}
           {% endif %}
           {% if 'status' in show_columns or not show_columns %}
-            {% include 'touglates/list_field.html' with field=project_labels.status tag='th' %}
+            {% include 'touglates/list_field.html' with field='Status' tag='th' %}
           {% endif %}
           {% if 'time_spent' in show_columns or not show_columns %}
             {% include 'touglates/list_field.html' with field='Time Spent' tag='th' %}
