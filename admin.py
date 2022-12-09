@@ -11,7 +11,7 @@ class ProjectAdmin(admin.ModelAdmin):
         'created_by',
         'begin',
         'status',
-        'completion_notes',
+        # 'completion_notes',
         'recipient_emails'
     )
 

@@ -33,7 +33,7 @@ class ProjectForm(forms.ModelForm):
             'status',
             'status',
             'recipient_emails',
-            'completion_notes',
+            # 'completion_notes',
             'time_spent',
         ]
         widgets = {

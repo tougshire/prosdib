@@ -33,9 +33,9 @@
         <div id="div_time_spent">
           {% include './_form_field.html' with field=form.time_spent %}
         </div>
-        <div id="div_completion_notes">
+        {% comment %}<div id="div_completion_notes">
           {% include './_form_field.html' with field=form.completion_notes %}
-        </div>
+        </div>{% endcomment %}
         <div id="div_recipient_emails">
           {% include './_form_field.html' with field=form.recipient_emails %}
         </div>
