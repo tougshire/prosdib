@@ -287,6 +287,7 @@ class ProjectList(PermissionRequiredMixin, ListView):
             'technician',
             'created_by',
             'status',
+            'status__is_active'
         ])
         print('tp 231al27', self.vista_settings['fields'])
 
@@ -296,8 +297,7 @@ class ProjectList(PermissionRequiredMixin, ListView):
             ('filter__fieldname__0', ['status__is_active']),
             ('filter__op__0', ['exact']),
             ('filter__value__0', [True]),
-            ('order_by', ['priority', 'status', 'latest_update']),
-            ('order_by', ['priority', 'status']),
+            ('order_by', ['latest_update','priority', 'status',]),
             ('paginate_by',self.paginate_by),
         ],doseq=True) )
 
