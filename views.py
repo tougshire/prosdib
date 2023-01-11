@@ -24,7 +24,8 @@ from tougshire_vistas.views import (delete_vista, default_vista, get_global_vist
 from .forms import (ProjectForm, ProjectProjectNoteForm,
                     ProjectProjectNoteFormset, TechnicianForm)
 from .models import History, Project, ProjectNote, Technician
-
+from django.db.models import Max
+from django.db.models import Q
 
 def update_history(form, modelname, object, user):
     for fieldname in form.changed_data:
@@ -287,11 +288,15 @@ class ProjectList(PermissionRequiredMixin, ListView):
             'created_by',
             'status',
         ])
+        print('tp 231al27', self.vista_settings['fields'])
+
+        self.vista_settings['fields']['latest_update'] = {'type': 'DateField', 'label': 'Latest Major Update', 'available_for': ['order_by'], 'operators': []}
 
         self.vista_defaults = QueryDict(urlencode([
             ('filter__fieldname__0', ['status__is_active']),
             ('filter__op__0', ['exact']),
             ('filter__value__0', [True]),
+            ('order_by', ['priority', 'status', 'latest_update']),
             ('order_by', ['priority', 'status']),
             ('paginate_by',self.paginate_by),
         ],doseq=True) )
@@ -304,6 +309,7 @@ class ProjectList(PermissionRequiredMixin, ListView):
     def get_queryset(self, **kwargs):
 
         queryset = super().get_queryset()
+        queryset = queryset.annotate(latest_update=Max('projectnote__when', filter=Q(projectnote__is_current=True)))
 
         self.vistaobj = {'querydict':QueryDict(), 'queryset':queryset}
 
