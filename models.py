@@ -4,6 +4,8 @@ from datetime import datetime
 from django.apps import apps
 from libtekin.models import Item, Location
 from django.contrib.auth import get_user_model
+from django.db.models import Count, OuterRef, Q, Subquery
+
 
 def get_default_status():
     try:
@@ -69,6 +71,15 @@ class Technician(models.Model):
     @classmethod
     def user_is_tech(cls, user):
         return user in [ technician.user for technician in Technician.objects.all() ]
+
+class ProjectManager(models.Manager):
+
+    def get_queryset(self):
+        
+        return super().get_queryset(). \
+            annotate(latest_update_when=Subquery(ProjectNote.objects.filter(project=OuterRef('pk')).filter(is_current=True).order_by('-when').values('when')[:1])). \
+            annotate(qty_current_notes=Count('projectnote', filter=Q(projectnote__is_current=True))). \
+            order_by('latest_update_when')
 
 class Project(models.Model):
     PRIORITY_CHOICES = (
@@ -153,12 +164,10 @@ class Project(models.Model):
         if self.completion_notes:
             current_notes.append('final:{}'.format(self.completion_notes))
 
-        for note in self.projectnote_set.all():
-            if(note.is_current):
-                current_notes.append('{}: {}'.format(note.when.strftime('%Y-%m-%d'), note.text))
+        for note in self.projectnote_set.filter(is_current=True):
+            current_notes.append('{}: {}'.format(note.when.strftime('%Y-%m-%d'), note.text))
 
         return current_notes
-        # return separator.join(current_notes)
 
     def total_time_spent(self):
         time_spent = self.time_spent
@@ -167,8 +176,10 @@ class Project(models.Model):
 
         return time_spent
 
+    objects = ProjectManager()
+
     class Meta:
-        ordering=['status', 'priority', 'begin']
+        ordering=['status', 'priority']
 
 
 class ProjectNote(models.Model):
