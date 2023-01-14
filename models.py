@@ -165,7 +165,7 @@ class Project(models.Model):
             current_notes.append('final:{}'.format(self.completion_notes))
 
         for note in self.projectnote_set.filter(is_current=True):
-            current_notes.append('{}: {}'.format(note.when.strftime('%Y-%m-%d'), note.text))
+            current_notes.append('{}: {}'.format(note.when.strftime('%Y-%m-%d'), note.maintext))
 
         return current_notes
 
@@ -189,7 +189,7 @@ class ProjectNote(models.Model):
         on_delete=models.CASCADE,
         help_text='The project to which this note applies',
     )
-    text = models.CharField(
+    maintext = models.CharField(
         'text',
         blank=True,
         max_length=255,
@@ -198,7 +198,7 @@ class ProjectNote(models.Model):
     details = models.TextField(
         'details',
         blank=True,
-        help_text='The details of the note if the summary text is not sufficient'
+        help_text='The details of the note if the main text is not sufficient'
     )
     submitted_by = models.ForeignKey(
         Technician,
@@ -229,7 +229,7 @@ class ProjectNote(models.Model):
         ordering = ['-when',]
 
     def __str__(self):
-        return self.text
+        return self.maintext
 
 class History(models.Model):
 

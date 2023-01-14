@@ -49,13 +49,13 @@ class ProjectProjectNoteForm(forms.ModelForm):
         model = ProjectNote
         fields = [
             'when',
-            'text',
+            'maintext',
             'is_current',
             'time_spent',
         ]
         widgets={
             'when':forms.DateTimeInput(format='%Y-%m-%dT%H:%M:%S',  attrs={'type':'datetime-local'} ),
-            'text':forms.TextInput(attrs={'class':'len100'})
+            'maintext':forms.TextInput(attrs={'class':'len100'})
         }
 
 class TechnicianForm(forms.ModelForm):

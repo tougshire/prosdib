@@ -2,7 +2,7 @@
 {% block content %}
 <script>
 if(window.opener) {
-  window.opener.refreshDiv({'when':'{{ object.when }}', 'text':'{{ object.text }}'}, "projectnote")
+  window.opener.refreshDiv({'when':'{{ object.when }}', 'text':'{{ object.maintext }}'}, "projectnote")
   window.close()
 }
 </script>
