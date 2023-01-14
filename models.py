@@ -195,6 +195,11 @@ class ProjectNote(models.Model):
         max_length=255,
         help_text='The text of the note'
     )
+    details = models.TextField(
+        'details',
+        blank=True,
+        help_text='The details of the note if the summary text is not sufficient'
+    )
     submitted_by = models.ForeignKey(
         Technician,
         verbose_name='submitted by',
