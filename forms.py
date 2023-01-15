@@ -54,8 +54,9 @@ class ProjectProjectNoteForm(forms.ModelForm):
             'time_spent',
         ]
         widgets={
-            'when':forms.DateTimeInput(format='%Y-%m-%dT%H:%M:%S',  attrs={'type':'datetime-local'} ),
-            'maintext':forms.TextInput(attrs={'class':'len100'})
+            'when':forms.DateInput( attrs={ "type":"date" } ),
+            'maintext':forms.TextInput( attrs={ "class":"widthlong"}),
+            'details':forms.Textarea( attrs={ "class":"widthlong"})
         }
 
 class TechnicianForm(forms.ModelForm):
