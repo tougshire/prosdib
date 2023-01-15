@@ -11,59 +11,33 @@
     {% include './_detail_field.html' with label=project_labels.status field=object.status %}
     {% include './_detail_field.html' with label='Total time spent' field=object.get_time_spent %}
 
-    <h3>Notes</h3><span id="div_relatednotesShowing">Showing All </span><a href="#" id="a_toggleCurrent">Show Current</a>
-    {% user_is_editor object user as editor %}
-    <div class="detail-related">
-      <div class="relatedheader">
-        <div class="field">
-          Date/time of note
-        </div>
-        <div class="field">
-          Text
-        </div>
-        <div class="field">
-          Submitted By
-        </div>
-        <div class="field">
-          Time spent
-        </div>
-        <div class="field">
-          Is Current
-        </div>
-
-      </div>
-
+    {% if not hide_notes %}
+    <h3>Notes</h3><span id="div_projectNotesShowing">Showing All </span><a href="#" id="a_toggleCurrent">Show Current</a>
     {% for projectnote in object.projectnote_set.all %}
-      <div class="relatedset relatednote{% if projectnote.is_current %} current{% endif %}" id="div_relatednote-{{ forloop.counter0 }}">
-
-        <div class="field">
-              {{ projectnote.when|date:'Y-m-d' }}
+      <div class="relatedset relatedprojectnote{% if projectnote.is_current %} current{% endif %}" id="div_projectnote-{{ forloop.counter0 }}">
+        <div class="fieldWrapper">
+          <div class="control">
+            <div class="label">
+              Note:
             </div>
             <div class="field">
-              {{ projectnote.maintext }}
+              {{ projectnote }}
             </div>
-            <div class="field">
-              {{ projectnote.submitted_by }}
+          </div>
+          {% if projectnote.details %}
+            <div class="control">
+              <div class="label">
+                &nbsp;Details:
+              </div>
+              <div class="field">
+                &nbsp;{{ projectnote.details }}
+              </div>
             </div>
-            <div class="field">
-              {{ projectnote.time_spent }}
-            </div>
-            <div class="field">
-              {{ projectnote.is_current|yesno }}
-            </div>
-
+          {% endif %}
+        </div>
       </div>
     {% endfor %}
-    <div class="relatedset relatednote" id="div_relatednote-empty" style="display:none">
-      <div class="field">
-      </div>
-      <div class="field">
-      </div>
-      <div class="field">
-      </div>
-      <div class="field">
-      </div>
-    </div>
+    {% endif %}
   </div>
 
   <script>
@@ -83,32 +57,29 @@
       newdiv.style.display="block"
       emptydiv.parentNode.insertBefore(newdiv, emptydiv)
     }
-  </script>
+  </script> 
   <script>
     function toggleCurrentNotes() {
-      var relatednotes=document.getElementsByClassName('relatednote')
-      var relatednotesShowing = document.getElementById('div_relatednotesShowing')
+      var projectNotes=document.getElementsByClassName('relatedprojectnote')
+      var projectNotesShowing = document.getElementById('div_projectNotesShowing')
       var toggleCurrent = document.getElementById('a_toggleCurrent')
       if(toggleCurrent.textContent=='Show All '){
-        for(relatednote of relatednotes) {
-          if(!(relatednote.classList.contains('current'))){
-            {% comment %} relatednote.classList.remove('hidden') {% endcomment %}
-            relatednote.style.display=null;
-
+        for(projectNote of projectNotes) {
+          if(!(projectNote.classList.contains('current'))){
+            projectNote.classList.remove('hidden')
           }
         }
         toggleCurrent.textContent='Show Current '
-        relatednotesShowing.textContent='Showing All '
+        projectNotesShowing.textContent='Showing All '
       } else {
-        for(relatednote of relatednotes) {
-          if(!(relatednote.classList.contains('current'))){
+        for(projectNote of projectNotes) {
+          if(!(projectNote.classList.contains('current'))){
             console.log('adding hidden')
-            {% comment %} relatednote.classList.add('hidden')  {% endcomment %}
-            relatednote.style.display="none";
+            projectNote.classList.add('hidden')
           }
         }
         toggleCurrent.textContent='Show All '
-        relatednotesShowing.textContent='Showing Current '
+        projectNotesShowing.textContent='Showing Current '
       }
     }
     toggleCurrentNotes()
@@ -117,4 +88,5 @@
       toggleCurrentNotes()
     });
   </script>
+
 

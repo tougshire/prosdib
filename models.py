@@ -215,7 +215,7 @@ class ProjectNote(models.Model):
         ordering = ['-when',]
 
     def __str__(self):
-        return self.maintext
+        return f'{self.when.date().isoformat()}: {self.maintext}' if self.when else self.maintext
 
 class History(models.Model):
 
