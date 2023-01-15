@@ -9,8 +9,7 @@
     {% include './_detail_field.html' with label=project_labels.created_by field=object.created_by %}
     {% include './_detail_field.html' with label=project_labels.begin field=object.begin %}
     {% include './_detail_field.html' with label=project_labels.status field=object.status %}
-    {% comment %} {% include './_detail_field.html' with label=project_labels.completion_notes field=object.completion_notes %} {% endcomment %}
-    {% include './_detail_field.html' with label='Total time spent' field=object.total_time_spent %}
+    {% include './_detail_field.html' with label='Total time spent' field=object.get_time_spent %}
 
     <h3>Notes</h3><span id="div_relatednotesShowing">Showing All </span><a href="#" id="a_toggleCurrent">Show Current</a>
     {% user_is_editor object user as editor %}

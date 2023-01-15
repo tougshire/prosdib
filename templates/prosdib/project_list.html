@@ -56,7 +56,7 @@
             {% include 'touglates/list_field.html' with field=item.status tag="td" %}
           {% endif %}
           {% if 'time_spent' in show_columns or not show_columns %}
-            {% include 'touglates/list_field.html' with field=item.time_spent tag="td" %}
+            {% include 'touglates/list_field.html' with field=item.get_time_spent tag="td" %}
           {% endif %}
           {% if 'notes' in show_columns or not show_columns %}
             <td class="field column">

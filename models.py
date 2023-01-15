@@ -135,22 +135,10 @@ class Project(models.Model):
         default = get_default_status,
         help_text = 'The status of this project'
     )
-    completion_notes = models.TextField(
-        'resolution notes',
-        blank=True,
-        help_text='How the problem was resolved'
-    )
     recipient_emails = models.TextField(
         'recipient emails',
         blank=True,
         help_text='The comma-separated list of emails of those who should get updates on this project.  By default, emails are sent for changes in notes and resolution status'
-    )
-    time_spent = models.DecimalField(
-        'time spent',
-        default=0,
-        decimal_places=2,
-        max_digits=6,
-        help_text='The amount of time to be added to the project in addition to time spent logged in notes.  Use decimal notation (ex 1.25, not 1:15)'
     )
 
     def __str__(self):
@@ -161,17 +149,15 @@ class Project(models.Model):
 
     def get_current_notes(self):
         current_notes=[]
-        if self.completion_notes:
-            current_notes.append('final:{}'.format(self.completion_notes))
 
         for note in self.projectnote_set.filter(is_current=True):
             current_notes.append('{}: {}'.format(note.when.strftime('%Y-%m-%d'), note.maintext))
 
         return current_notes
 
-    def total_time_spent(self):
-        time_spent = self.time_spent
-        for note in self.projectnote_set.all():
+    def get_time_spent(self):
+        time_spent = 0
+        for note in self.projectnote_set.filter(time_spent__gt=0):
             time_spent = time_spent + note.time_spent
 
         return time_spent

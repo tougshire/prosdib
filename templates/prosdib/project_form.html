@@ -30,12 +30,6 @@
         <div id="div_status">
           {% include './_form_field.html' with field=form.status %}
         </div>
-        <div id="div_time_spent">
-          {% include './_form_field.html' with field=form.time_spent %}
-        </div>
-        {% comment %}<div id="div_completion_notes">
-          {% include './_form_field.html' with field=form.completion_notes %}
-        </div>{% endcomment %}
         <div id="div_recipient_emails">
           {% include './_form_field.html' with field=form.recipient_emails %}
         </div>
@@ -58,6 +52,7 @@
             {% include './_form_field.html' with field=projectnoteform.when %}
             {% include './_form_field.html' with field=projectnoteform.maintext %}
             {% include './_form_field.html' with field=projectnoteform.is_current %}
+            {% include './_form_field.html' with field=projectnoteform.details %}
             {% include './_form_field.html' with field=projectnoteform.time_spent %}
             {% include './_form_field.html' with field=projectnoteform.DELETE %}
           </div>
@@ -70,6 +65,7 @@
             {% include './_form_field.html' with field=projectnoteform.when %}
             {% include './_form_field.html' with field=projectnoteform.maintext %}
             {% include './_form_field.html' with field=projectnoteform.is_current %}
+            {% include './_form_field.html' with field=projectnoteform.details %}
             {% include './_form_field.html' with field=projectnoteform.time_spent %}
             {% include './_form_field.html' with field=projectnoteform.DELETE %}
           </div>
@@ -103,6 +99,9 @@
             </td>
             <td>
               {{ projectnote.maintext }}
+            </td>
+            <td>
+              {{ projectnote.details }}
             </td>
             <td>
               {{ projectnote.time_spent }}
