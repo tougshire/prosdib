@@ -50,6 +50,7 @@ class ProjectProjectNoteForm(forms.ModelForm):
         fields = [
             'when',
             'maintext',
+            'details',
             'is_current',
             'time_spent',
         ]
