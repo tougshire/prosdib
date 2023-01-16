@@ -46,6 +46,7 @@ class ProjectProjectNoteForm(forms.ModelForm):
     class Meta:
         model = ProjectNote
         fields = [
+            'project',
             'when',
             'maintext',
             'details',
