@@ -165,6 +165,13 @@
       document.getElementById(formid).style.display="block"
       document.getElementById(displayid).style.display="none"
     }
+    let projectnoteEditButtons = document.getElementsByClassName('projectnote_edit_button')
+    for( projectnoteEditButton of projectnoteEditButtons){
+      projectnoteEditButton.addEventListener('click', function(e){
+        e.preventDefault()
+        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
+      })
+    }
     function enableAddFormsetForm(formclass) {
       let newforms = document.getElementsByClassName(formclass)
       if( newforms.length > 0) {
@@ -186,20 +193,6 @@
     }
 
   </script>
-  <script>
-    document.body.addEventListener('click', function(e) {
-      if(e.target.classList.contains('projectnote_edit_button')) {
-        e.preventDefault();
-        enableFormsetForm(e.target.dataset.formid, e.target.dataset.displayid)
-      }
-      if(e.target.classList.contains('is_current_proxy')) {
-        checkForm = document.getElementById(e.target.dataset.formid)
-        checkBox = checkForm.querySelector("input[name$='is_current']")
-        checkBox.checked = e.target.checked
-      }
-    })
-  </script>
-
 
 {% endblock %}
 
