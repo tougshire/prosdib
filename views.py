@@ -150,19 +150,22 @@ class ProjectCreate(PermissionRequiredMixin, CreateView):
             self.object.recipient_emails = self.get_initial()['recipient_emails']
 
 
-        self.object.save()
+        self.object = form.save()
 
-        projectnotes = ProjectProjectNoteFormset(self.request.POST, instance=self.object)
+        if self.request.POST:
+            projectnotes = ProjectProjectNoteFormset(self.request.POST, instance=self.object)
 
-        if(projectnotes).is_valid():
-            for form in projectnotes.forms:
-                projectnote = form.save(commit=False)
-                if projectnote.submitted_by is None:
-                    projectnote.submitted_by = technician
-            projectnotes.save()
+            if(projectnotes).is_valid():
+                for form in projectnotes.forms:
+                    projectnote = form.save(commit=False)
+                    if projectnote.submitted_by is None:
+                        projectnote.submitted_by = technician
+                projectnotes.save()
+            else:
+                return self.form_invalid(form)
+
         else:
-            return self.form_invalid(form)
-
+            projectnotes = ProjectProjectNoteFormset(instance=self.object)
 
         if 'send_mail' in self.request.POST:
             send_project_mail(self.object, self.request, is_new=True)
@@ -250,7 +253,7 @@ class ProjectDelete(PermissionRequiredMixin, UpdateView):
 class ProjectSoftDelete(PermissionRequiredMixin, UpdateView):
     permission_required = 'prosdib.delete_project'
     model = Project
-    template_name = 'prosdib/item_confirm_delete.html'
+    template_name = 'prosdib/project_confirm_delete.html'
     success_url = reverse_lazy('prosdib:project-list')
     fields = ['is_deleted']
 
