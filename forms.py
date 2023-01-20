@@ -53,7 +53,6 @@ class ProjectProjectNoteForm(forms.ModelForm):
             'time_spent',
         ]
         widgets={
-            'when':forms.DateInput( attrs={ "type":"date" } ),
             'maintext':forms.TextInput( attrs={ "class":"widthlong"}),
             'details':forms.Textarea( attrs={ "class":"widthlong"})
         }
