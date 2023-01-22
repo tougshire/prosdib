@@ -198,33 +198,68 @@ class ProjectUpdate(PermissionRequiredMixin, UpdateView):
 
         response = super().form_valid(form)
 
-        self.object = form.save()
-
+        self.object = form.save(commit=False)
         technician, created = Technician.objects.get_or_create(
             user=self.request.user,
             defaults={'name': self.request.user.__str__()},
         )
+        self.object.submitted_by = technician
 
-        projectnotes = ProjectProjectNoteFormset(self.request.POST, instance=self.object, initial=[
-            {
-                'submitted_by': technician
-            }
-        ])
+        if not 'recipient_emails' in self.request.POST:
+            self.object.recipient_emails = self.get_initial()['recipient_emails']
 
-        if(projectnotes).is_valid():
-            for form in projectnotes.forms:
-                projectnote = form.save(commit=False)
-                if projectnote.submitted_by is None:
-                    projectnote.submitted_by = technician
-            projectnotes.save()
+
+        self.object = form.save()
+
+        if self.request.POST:
+            projectnotes = ProjectProjectNoteFormset(self.request.POST, instance=self.object)
+
+            if(projectnotes).is_valid():
+                for form in projectnotes.forms:
+                    projectnote = form.save(commit=False)
+                    if projectnote.submitted_by is None:
+                        projectnote.submitted_by = technician
+                projectnotes.save()
+            else:
+                return self.form_invalid(form)
+
         else:
-            print(projectnotes.errors)
-            return self.form_invalid(form)
+            projectnotes = ProjectProjectNoteFormset(instance=self.object)
 
         if 'send_mail' in self.request.POST:
             send_project_mail(self.object, self.request, is_new=False)
 
         return response
+
+        # response = super().form_valid(form)
+
+        # self.object = form.save()
+
+        # technician, created = Technician.objects.get_or_create(
+        #     user=self.request.user,
+        #     defaults={'name': self.request.user.__str__()},
+        # )
+
+        # projectnotes = ProjectProjectNoteFormset(self.request.POST, instance=self.object, initial=[
+        #     {
+        #         'submitted_by': technician
+        #     }
+        # ])
+
+        # if(projectnotes).is_valid():
+        #     for form in projectnotes.forms:
+        #         projectnote = form.save(commit=False)
+        #         if projectnote.submitted_by is None:
+        #             projectnote.submitted_by = technician
+        #     projectnotes.save()
+        # else:
+        #     print(projectnotes.errors)
+        #     return self.form_invalid(form)
+
+        # if 'send_mail' in self.request.POST:
+        #     send_project_mail(self.object, self.request, is_new=False)
+
+        # return response
 
     def get_success_url(self):
 
