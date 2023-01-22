@@ -14,8 +14,8 @@ class ViewTests(TestCase):
 
     def test_project_list_view(self):
         client = Client()
-        response = client.get('/prosdib/projects/')
-        self.assertEqual(response.status_code, 200)
+        response = client.get('/prosdib/project/')
+        self.assertEqual(response.url, '/prosdib/project/list/')
 
     def test_project_detail_view(self):
         Project.objects.create()
