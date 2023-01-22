@@ -130,9 +130,15 @@ class ProjectCreate(PermissionRequiredMixin, CreateView):
     def get_initial(self):
         tech_emails = [tech.user.email for tech in Technician.objects.filter(is_current=True).filter(user__isnull=False)]
         all_recipient_emails = ( tech_emails + [ self.request.user.email ] ) if self.request.user.email not in tech_emails else tech_emails
+        technicians = Technician.objects.filter(user=self.request.user)
+        if technicians.exists:
+            technician = technicians.first()
+        else:
+            technician = None
 
         return {
-            'recipient_emails': ",\n".join(all_recipient_emails)
+            'recipient_emails': ",\n".join(all_recipient_emails),
+            'technician': technician
         }
 
     def form_valid(self, form):
