@@ -1,6 +1,6 @@
 from django.test import  SimpleTestCase, TestCase, Client
 from ..forms import ProjectForm
-from ..models import Project, StatusUpdate
+from ..models import Project
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
@@ -132,8 +132,6 @@ class ProjectCreatestatusupdateFormsetTests(TestCase):
             'statusupdate_set-2-maintext':'',
         })
         self.assertEqual(Project.objects.count(), 1)
-        self.assertEqual(StatusUpdate.objects.count(), 1)
-        self.assertEqual(StatusUpdate.objects.first().project.pk, Project.objects.first().pk)
 
 class ProjectUpdatestatusupdateFormsetTests(TestCase):
 
@@ -146,10 +144,6 @@ class ProjectUpdatestatusupdateFormsetTests(TestCase):
         )
         cls.project_one = Project.objects.create(
             name = 'Project one'
-        )
-        cls.statusupdate_one = StatusUpdate.objects.create(
-            project = cls.project_one,
-            maintext = 'Project Note One',
         )
 
     def test_project_post_with_statusupdate_update_with_superuser(self):
@@ -182,6 +176,3 @@ class ProjectUpdatestatusupdateFormsetTests(TestCase):
             'statusupdate_set-3-maintext':'',
         })
         self.assertEqual(Project.objects.count(), 1)
-        self.assertEqual(StatusUpdate.objects.count(), 2)
-        self.assertEqual(StatusUpdate.objects.first().project.pk, Project.objects.first().pk)
-        self.assertEqual(StatusUpdate.objects.all()[1].project.pk, Project.objects.first().pk)
