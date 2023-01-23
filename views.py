@@ -211,10 +211,6 @@ class ProjectUpdate(PermissionRequiredMixin, UpdateView):
         )
         self.object.submitted_by = technician
 
-        if not 'recipient_emails' in self.request.POST:
-            self.object.recipient_emails = self.get_initial()['recipient_emails']
-
-
         self.object = form.save()
 
         if self.request.POST:

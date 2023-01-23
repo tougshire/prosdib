@@ -1,27 +1,35 @@
 [
     {
-      "model": "tougshire_auth.tougshireauthuser",
-      "pk": 1,
-      "fields": {
-        "username":"alpha",
-        "password":"pbkdf2_sha256$390000$zJMElUlGt82k4uONdB95Ki$uyfYJShveVpG1eh3Y65EIVBPrJKiWQzt3wCApb4p+nI=",
-        "is_superuser": true
-      }
-    },
-    {
       "model": "prosdib.status",
       "pk": 1,
       "fields": {
-        "name": "Status One",
+        "name": "Status Alpha",
         "is_default": false
       }
     },
     {
-        "model": "prosdib.status",
-        "pk": 2,
-        "fields": {
-          "name": "Status Two",
-          "is_default": true
-        }
+      "model": "prosdib.status",
+      "pk": 2,
+      "fields": {
+        "name": "Status Bravo",
+        "is_default": true
       }
+    },
+    {
+      "model": "prosdib.project",
+      "pk": 1,
+      "fields": {
+        "title": "Project Alpha",
+        "description": "The first project sourced through fixture"
+
+      }
+    },
+    {
+      "model": "prosdib.projectnote",
+      "pk": 1,
+      "fields": {
+        "project": 1,
+        "maintext": "maintext"
+      }
+    }
   ]
