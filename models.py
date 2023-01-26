@@ -5,7 +5,7 @@ from django.apps import apps
 from libtekin.models import Item, Location
 from django.contrib.auth import get_user_model
 from django.db.models import Count, OuterRef, Q, Subquery
-
+from django.utils import timezone
 
 def get_default_status():
     try:
@@ -107,7 +107,7 @@ class Project(models.Model):
         help_text='The priority, on a scale of 1 to 5, where 1 is the highest priority'
     )
     begin = models.DateTimeField(
-        default=datetime.now,
+        default=timezone.now,
         help_text='The date and time the project was submitted'
     )
     technician = models.ForeignKey(

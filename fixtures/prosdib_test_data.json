@@ -14,22 +14,5 @@
         "name": "Status Bravo",
         "is_default": true
       }
-    },
-    {
-      "model": "prosdib.project",
-      "pk": 1,
-      "fields": {
-        "title": "Project Alpha",
-        "description": "The first project sourced through fixture"
-
-      }
-    },
-    {
-      "model": "prosdib.projectnote",
-      "pk": 1,
-      "fields": {
-        "project": 1,
-        "maintext": "maintext"
-      }
     }
   ]
