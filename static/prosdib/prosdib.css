@@ -26,7 +26,10 @@
     width: 100%;
     padding: 1px 1px;
 }
-
+.menu-here {
+    border:1px solid black;
+    font-weight: bold;
+}
 .form .formset {
     margin-left:2em;
 }
