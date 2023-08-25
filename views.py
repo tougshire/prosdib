@@ -17,7 +17,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 from libtekin.models import Item, Location, Mmodel
 from tougshire_vistas.models import Vista
-from tougshire_vistas.views import (delete_vista, default_vista, get_global_vista,
+from tougshire_vistas.views import (delete_vista, default_vista,
                                     get_latest_vista, make_vista,
                                     retrieve_vista, vista_context_data, make_vista_fields)
 
@@ -362,7 +362,6 @@ class ProjectList(PermissionRequiredMixin, ListView):
                 queryset,
                 querydict,
                 '',
-                False,
                 self.vista_settings
             )
             del self.request.session['query']
@@ -374,7 +373,6 @@ class ProjectList(PermissionRequiredMixin, ListView):
                 queryset,
                 self.request.POST,
                 self.request.POST.get('vista_name') if 'vista_name' in self.request.POST else '',
-                self.request.POST.get('make_default') if ('make_default') in self.request.POST else False,
                 self.vista_settings
             )
         elif 'retrieve_vista' in self.request.POST:
@@ -385,13 +383,6 @@ class ProjectList(PermissionRequiredMixin, ListView):
                 self.request.POST.get('vista_name'),
                 self.vista_settings
 
-            )
-        else: #elif 'default_vista' in self.request.POST:
-            self.vistaobj = default_vista(
-                self.request.user,
-                queryset,
-                self.vista_defaults,
-                self.vista_settings
             )
 
         return self.vistaobj['queryset']
