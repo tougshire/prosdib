@@ -17,7 +17,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 from libtekin.models import Item, Location, Mmodel
 from tougshire_vistas.models import Vista
-from tougshire_vistas.views import (delete_vista, default_vista,
+from tougshire_vistas.views import (delete_vista, 
                                     get_latest_vista, get_vista_queryset, make_vista,
                                     retrieve_vista, vista_context_data, make_vista_fields)
 
